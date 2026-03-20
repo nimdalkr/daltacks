@@ -1,4 +1,5 @@
 import { ActivityFeed } from "./components/ActivityFeed";
+import { AssetPortfolioPanel } from "./components/AssetPortfolioPanel";
 // import { ActiveSnapshotCard } from "./components/ActiveSnapshotCard";
 // import { CheckInPanel } from "./components/CheckInPanel";
 // import { CreateSnapshotPanel } from "./components/CreateSnapshotPanel";
@@ -6,7 +7,7 @@ import { EmptyState } from "./components/EmptyState";
 import { InlineState } from "./components/InlineState";
 import { WalletConnectButton } from "./components/WalletConnectButton";
 import { WalletStatusPill } from "./components/WalletStatusPill";
-import { useRecentActivity } from "./hooks/useTracker";
+import { useRecentActivity, useWalletPortfolio } from "./hooks/useTracker";
 // import { useDashboard } from "./hooks/useTracker";
 // import { useCreateSnapshot, useCheckIn } from "./hooks/useTracker";
 import { useWalletSession } from "./hooks/useWalletSession";
@@ -17,6 +18,7 @@ export default function App() {
   const wallet = useWalletSession();
   // const dashboardQuery = useDashboard(wallet.principal);
   const activityQuery = useRecentActivity(wallet.principal);
+  const portfolioQuery = useWalletPortfolio(wallet.principal);
   // Snapshot / check-in write flows are intentionally disabled for the current
   // read-only explorer mode.
   // const createSnapshotMutation = useCreateSnapshot(wallet.principal);
@@ -30,10 +32,6 @@ export default function App() {
           <h1 className="mt-3 text-4xl font-semibold leading-tight text-white md:text-6xl">
             Inspect recent mainnet activity from a connected wallet.
           </h1>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300">
-            This read-only view resolves your connected Stacks address and loads recent on-chain transactions from
-            Hiro's indexed API.
-          </p>
         </div>
 
         <div className="flex flex-col items-start gap-3 md:items-end">
@@ -58,6 +56,16 @@ export default function App() {
       {wallet.isSignedIn ? (
         <section className="mt-10 space-y-6">
           <div className="space-y-6">
+            {portfolioQuery.isLoading ? <InlineState message="Loading wallet assets..." tone="loading" /> : null}
+
+            {portfolioQuery.error instanceof Error ? (
+              <InlineState message={portfolioQuery.error.message} tone="error" />
+            ) : null}
+
+            {!portfolioQuery.isLoading && !portfolioQuery.error && portfolioQuery.data ? (
+              <AssetPortfolioPanel portfolio={portfolioQuery.data} />
+            ) : null}
+
             {activityQuery.isLoading ? <InlineState message="Loading recent activity..." tone="loading" /> : null}
 
             {activityQuery.error instanceof Error ? (

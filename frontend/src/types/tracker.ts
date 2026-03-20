@@ -9,6 +9,23 @@ export interface ActivityItem {
   timestampIso: string | null;
 }
 
+export interface TokenHolding {
+  assetId: string;
+  contractId: string;
+  name: string;
+  symbol: string;
+  balance: string;
+  rawBalance: string;
+  decimals: number | null;
+}
+
+export interface WalletPortfolio {
+  stxBalance: number | null;
+  lockedStx: number | null;
+  fungibleTokens: TokenHolding[];
+  defiTokens: TokenHolding[];
+}
+
 export interface SubmittedTx {
   txid: string | null;
   explorerUrl: string | null;

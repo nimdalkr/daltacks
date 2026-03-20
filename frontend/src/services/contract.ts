@@ -21,7 +21,7 @@ import {
   type TrackerTransport
 } from "@daltacks/tracker-sdk";
 // import { type ContractCallDraft } from "@daltacks/tracker-sdk";
-import type { ActivityItem } from "../types/tracker";
+import type { ActivityItem, TokenHolding, WalletPortfolio } from "../types/tracker";
 // import type { SubmittedTx } from "../types/tracker";
 
 const NETWORK = (import.meta.env.VITE_STACKS_NETWORK ?? "mainnet") as StacksNetworkName;
@@ -141,6 +141,69 @@ function formatActivityTitle(txType: string | null | undefined, functionName?: s
     .join(" ");
 }
 
+function normalizeNonNegativeBalance(value: string | null | undefined) {
+  if (!value || !/^\d+$/.test(value)) {
+    return "0";
+  }
+
+  return value;
+}
+
+function formatTokenBalance(rawValue: string, decimals: number | null) {
+  if (decimals === null || decimals < 0) {
+    return rawValue;
+  }
+
+  const padded = rawValue.padStart(decimals + 1, "0");
+  const whole = padded.slice(0, padded.length - decimals) || "0";
+  const fraction = padded.slice(padded.length - decimals).replace(/0+$/, "");
+  return fraction ? `${whole}.${fraction}` : whole;
+}
+
+function toContractId(assetId: string) {
+  return assetId.split("::")[0] ?? assetId;
+}
+
+function inferTokenName(assetId: string) {
+  return assetId.split("::")[1] ?? assetId;
+}
+
+function isDefiLikeHolding(item: TokenHolding) {
+  const value = `${item.name} ${item.symbol} ${item.contractId}`.toLowerCase();
+  return /(lp|pool|vault|stake|staked|yield|farm|liquidity|receipt|share)/.test(value);
+}
+
+function compareRawBalances(left: string, right: string) {
+  const leftValue = BigInt(left);
+  const rightValue = BigInt(right);
+
+  if (leftValue === rightValue) {
+    return 0;
+  }
+
+  return leftValue > rightValue ? -1 : 1;
+}
+
+async function fetchTokenMetadata(contractId: string) {
+  const response = await fetch(`${API_BASE_URL}/metadata/v1/ft/${encodeURIComponent(contractId)}`);
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const payload = (await response.json()) as {
+    name?: string;
+    symbol?: string;
+    decimals?: number;
+  };
+
+  return {
+    name: payload.name ?? inferTokenName(contractId),
+    symbol: payload.symbol ?? inferTokenName(contractId).toUpperCase(),
+    decimals: typeof payload.decimals === "number" ? payload.decimals : null
+  };
+}
+
 async function decodeReadOnlyResult(response: Response, request: ReadOnlyRequest) {
   const payload = (await response.json()) as { okay?: boolean; result?: string; cause?: string };
 
@@ -201,6 +264,85 @@ export function createTrackerTransport(): TrackerTransport {
 
       return fromMicroStx(payload.stx?.balance) ?? null;
     }
+  };
+}
+
+export async function getWalletPortfolio(principal: string): Promise<WalletPortfolio> {
+  const response = await fetch(`${API_BASE_URL}/extended/v1/address/${principal}/balances`);
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch wallet balances");
+  }
+
+  const payload = (await response.json()) as {
+    stx?: {
+      balance?: string;
+      locked?: string;
+    };
+    fungible_tokens?: Record<
+      string,
+      {
+        balance?: string;
+      }
+    >;
+  };
+
+  const assetEntries = Object.entries(payload.fungible_tokens ?? {})
+    .map(([assetId, value]) => ({
+      assetId,
+      contractId: toContractId(assetId),
+      rawBalance: normalizeNonNegativeBalance(value?.balance)
+    }))
+    .filter((item) => item.rawBalance !== "0");
+
+  const metadataByContract = new Map(
+    (
+      await Promise.all(
+        assetEntries.map(async (item) => {
+          const metadata = await fetchTokenMetadata(item.contractId);
+          return [item.contractId, metadata] as const;
+        })
+      )
+    ).filter((entry) => entry[1] !== null)
+  );
+
+  const fungibleTokens = assetEntries
+    .map((item) => {
+      const metadata = metadataByContract.get(item.contractId) ?? null;
+      const decimals = metadata?.decimals ?? null;
+
+      return {
+        assetId: item.assetId,
+        contractId: item.contractId,
+        name: metadata?.name ?? inferTokenName(item.assetId),
+        symbol: metadata?.symbol ?? inferTokenName(item.assetId).toUpperCase(),
+        rawBalance: item.rawBalance,
+        balance: formatTokenBalance(item.rawBalance, decimals),
+        decimals
+      } satisfies TokenHolding;
+    })
+    .sort((left, right) => compareRawBalances(left.rawBalance, right.rawBalance));
+
+  const lockedStx = fromMicroStx(payload.stx?.locked) ?? null;
+  const defiTokens = fungibleTokens.filter(isDefiLikeHolding);
+
+  if (lockedStx && lockedStx > 0) {
+    defiTokens.unshift({
+      assetId: "stx-locked",
+      contractId: principal,
+      name: "Locked STX",
+      symbol: "STX",
+      rawBalance: String(payload.stx?.locked ?? "0"),
+      balance: `${lockedStx.toFixed(2)} STX`,
+      decimals: 6
+    });
+  }
+
+  return {
+    stxBalance: fromMicroStx(payload.stx?.balance) ?? null,
+    lockedStx,
+    fungibleTokens,
+    defiTokens
   };
 }
 

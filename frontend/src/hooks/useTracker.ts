@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 // import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { getRecentActivity } from "../services/contract";
+import { getRecentActivity, getWalletPortfolio } from "../services/contract";
 // import { createSnapshot, getCurrentBlockHeight, hashTextToHex, submitCheckIn } from "../services/contract";
 // import { createTrackerTransport, trackerSdk } from "../services/contract";
 // const transport = createTrackerTransport();
@@ -16,6 +16,14 @@ export function useRecentActivity(principal: string | null) {
   return useQuery({
     queryKey: ["activity", principal],
     queryFn: () => getRecentActivity(principal!),
+    enabled: Boolean(principal)
+  });
+}
+
+export function useWalletPortfolio(principal: string | null) {
+  return useQuery({
+    queryKey: ["portfolio", principal],
+    queryFn: () => getWalletPortfolio(principal!),
     enabled: Boolean(principal)
   });
 }
