@@ -7,7 +7,7 @@ let wallet2: string;
 
 describe("tracker", () => {
   beforeEach(async () => {
-    simnet = await initSimnet("./Clarinet.toml", true);
+    simnet = await initSimnet("./tests/fixtures/Clarinet.test.toml", true);
     const accounts = simnet.getAccounts();
     wallet1 = accounts.get("wallet_1")!;
     wallet2 = accounts.get("wallet_2")!;

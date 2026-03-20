@@ -1,5 +1,5 @@
-(define-constant ERR_SNAPSHOT_EXISTS u100)
-(define-constant ERR_NO_ACTIVE_SNAPSHOT u101)
+(define-constant ERR_SNAPSHOT_EXISTS (err u100))
+(define-constant ERR_NO_ACTIVE_SNAPSHOT (err u101))
 
 (define-data-var snapshot-counter uint u0)
 
@@ -21,7 +21,7 @@
 
 (define-public (create-snapshot (commitment-hash (buff 32)) (due-at-height uint))
   (begin
-    (asserts! (is-none (map-get? active-snapshot-by-owner tx-sender)) (err ERR_SNAPSHOT_EXISTS))
+    (asserts! (is-none (map-get? active-snapshot-by-owner tx-sender)) ERR_SNAPSHOT_EXISTS)
     (let ((snapshot-id (+ (var-get snapshot-counter) u1)))
       (var-set snapshot-counter snapshot-id)
       (map-set snapshots
@@ -64,9 +64,9 @@
             )
             (ok true)
           )
-        (err ERR_NO_ACTIVE_SNAPSHOT)
+        ERR_NO_ACTIVE_SNAPSHOT
       )
-    (err ERR_NO_ACTIVE_SNAPSHOT)
+    ERR_NO_ACTIVE_SNAPSHOT
   )
 )
 
