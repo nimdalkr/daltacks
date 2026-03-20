@@ -119,6 +119,28 @@ function normalizeSnapshot(value: unknown): SnapshotRecord | null {
   };
 }
 
+function formatActivityTitle(txType: string | null | undefined, functionName?: string) {
+  if (txType === "contract_call") {
+    if (functionName) {
+      return functionName
+        .split("-")
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(" ");
+    }
+
+    return "Contract Call";
+  }
+
+  if (!txType) {
+    return "Unknown Transaction";
+  }
+
+  return txType
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 async function decodeReadOnlyResult(response: Response, request: ReadOnlyRequest) {
   const payload = (await response.json()) as { okay?: boolean; result?: string; cause?: string };
 
@@ -200,10 +222,6 @@ export async function hashTextToHex(value: string) {
   return `0x${output}`;
 }
 
-function isTrackerFunctionName(value: unknown): value is ActivityItem["functionName"] {
-  return value === "create-snapshot" || value === "check-in";
-}
-
 export async function getRecentActivity(principal: string, limit = 12): Promise<ActivityItem[]> {
   const response = await fetch(
     `${API_BASE_URL}/extended/v2/addresses/${principal}/transactions?limit=${limit}&offset=0&exclude_function_args=true`
@@ -215,32 +233,28 @@ export async function getRecentActivity(principal: string, limit = 12): Promise<
 
   const payload = (await response.json()) as {
     results?: Array<{
-      tx?: {
-        tx_id?: string;
-        tx_status?: string;
-        block_height?: number;
-        block_time_iso?: string;
-        tx_type?: string;
-        contract_call?: {
-          contract_id?: string;
-          function_name?: string;
+        tx?: {
+          tx_id?: string;
+          tx_status?: string;
+          block_height?: number;
+          block_time_iso?: string;
+          tx_type?: string;
+          sender_address?: string;
+          contract_call?: {
+            contract_id?: string;
+            function_name?: string;
+          };
         };
-      };
     }>;
   };
 
   return (payload.results ?? [])
     .map((entry) => entry.tx)
     .filter((tx): tx is NonNullable<typeof tx> => Boolean(tx))
-    .filter(
-      (tx) =>
-        tx.tx_type === "contract_call" &&
-        tx.contract_call?.contract_id === `${CONTRACT_ADDRESS}.${CONTRACT_NAME}` &&
-        isTrackerFunctionName(tx.contract_call?.function_name)
-    )
     .map((tx) => ({
       txId: tx.tx_id ?? "",
-      functionName: tx.contract_call!.function_name as ActivityItem["functionName"],
+      title: formatActivityTitle(tx.tx_type, tx.contract_call?.function_name),
+      subtitle: tx.contract_call?.contract_id ?? tx.sender_address ?? null,
       status: tx.tx_status ?? "unknown",
       blockHeight: tx.block_height ?? null,
       timestampIso: tx.block_time_iso ?? null

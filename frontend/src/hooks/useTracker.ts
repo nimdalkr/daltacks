@@ -1,21 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 // import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  createTrackerTransport,
-  getRecentActivity,
-  trackerSdk
-} from "../services/contract";
+import { getRecentActivity } from "../services/contract";
 // import { createSnapshot, getCurrentBlockHeight, hashTextToHex, submitCheckIn } from "../services/contract";
-
-const transport = createTrackerTransport();
-
-export function useDashboard(principal: string | null) {
-  return useQuery({
-    queryKey: ["dashboard", principal],
-    queryFn: () => trackerSdk.getDashboard(principal!, transport),
-    enabled: Boolean(principal)
-  });
-}
+// import { createTrackerTransport, trackerSdk } from "../services/contract";
+// const transport = createTrackerTransport();
+// export function useDashboard(principal: string | null) {
+//   return useQuery({
+//     queryKey: ["dashboard", principal],
+//     queryFn: () => trackerSdk.getDashboard(principal!, transport),
+//     enabled: Boolean(principal)
+//   });
+// }
 
 export function useRecentActivity(principal: string | null) {
   return useQuery({

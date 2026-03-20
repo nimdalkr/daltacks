@@ -14,13 +14,13 @@ export function ActivityFeed({ items, network }: ActivityFeedProps) {
           <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Recent Activity</p>
           <h2 className="mt-3 text-2xl font-semibold text-white">Wallet transaction feed</h2>
         </div>
-        <p className="text-sm text-slate-400">Hiro address transactions filtered to this contract.</p>
+        <p className="text-sm text-slate-400">Latest on-chain activity for the connected Stacks address.</p>
       </div>
 
       <div className="mt-6 space-y-3">
         {items.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-white/10 px-4 py-6 text-sm text-slate-400">
-            No tracker transactions found yet.
+            No on-chain transactions found for this address yet.
           </div>
         ) : null}
 
@@ -31,7 +31,8 @@ export function ActivityFeed({ items, network }: ActivityFeedProps) {
           >
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
-                <p className="text-sm font-medium capitalize text-white">{item.functionName.replace("-", " ")}</p>
+                <p className="text-sm font-medium text-white">{item.title}</p>
+                {item.subtitle ? <p className="mt-1 text-sm text-slate-400">{item.subtitle}</p> : null}
                 <p className="mt-1 text-xs uppercase tracking-[0.2em] text-slate-500">
                   {item.status} {item.blockHeight !== null ? `- block ${item.blockHeight}` : ""}
                 </p>

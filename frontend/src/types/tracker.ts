@@ -2,7 +2,8 @@ export type { SnapshotRecord, TrackerDashboard } from "@daltacks/tracker-sdk";
 
 export interface ActivityItem {
   txId: string;
-  functionName: "create-snapshot" | "check-in";
+  title: string;
+  subtitle: string | null;
   status: string;
   blockHeight: number | null;
   timestampIso: string | null;
