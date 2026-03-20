@@ -1,0 +1,23 @@
+{
+  "name": "daltacks",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "packages/*"
+  ],
+  "scripts": {
+    "build:frontend": "npm run build --workspace @daltacks/frontend",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "vercel-build": "npm run build:frontend"
+  },
+  "devDependencies": {
+    "@hirosystems/clarinet-sdk": "^3.5.0",
+    "typescript": "^5.8.2",
+    "vitest": "^3.1.1"
+  }
+}

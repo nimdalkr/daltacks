@@ -1,0 +1,9 @@
+[network]
+name = "mainnet"
+stacks_node_rpc_address = "https://api.hiro.so"
+deployment_fee_rate = 10
+
+[accounts.deployer]
+mnemonic = "<REPLACE_WITH_MAINNET_MNEMONIC>"
+derivation = "m/44'/5757'/0'/0/0"
+

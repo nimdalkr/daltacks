@@ -1,0 +1,16 @@
+[project]
+name = "daltacks"
+description = "Minimal Stacks accountability tracker"
+authors = []
+telemetry = false
+cache_dir = ".clarinet"
+requirements = []
+boot_contracts = []
+clarity_version = 2
+epoch = "2.4"
+
+[contracts.tracker]
+path = "contracts/tracker.clar"
+clarity_version = 2
+epoch = "2.4"
+
