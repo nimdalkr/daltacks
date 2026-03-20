@@ -80,3 +80,11 @@ export function fromMicroStx(value: bigint | number | string | null | undefined)
 export function toHexPrefixed(value: string): string {
   return value.startsWith("0x") ? value : `0x${value}`;
 }
+
+export {
+  DIRECT_PRICE_IDS_BY_SYMBOL,
+  getTrackedCoinGeckoIds,
+  normalizeTokenKey,
+  resolveKnownTokenPrice,
+  type KnownPriceSource
+} from "./pricing";
