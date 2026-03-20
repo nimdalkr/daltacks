@@ -7,11 +7,15 @@ interface WalletStatusPillProps {
 
 export function WalletStatusPill({ principal, network }: WalletStatusPillProps) {
   return (
-    <div className="glass inline-flex items-center gap-3 rounded-full border border-white/10 px-4 py-2 text-sm text-slate-300">
-      <span className="h-2 w-2 rounded-full bg-gold" />
-      <span>{principal ? truncatePrincipal(principal) : "No wallet"}</span>
-      <span className="text-slate-500">|</span>
-      <span className="uppercase tracking-[0.16em] text-slate-400">{network}</span>
+    <div className="tactical-panel panel-cut inline-flex w-full items-center justify-between gap-4 rounded-[1rem] px-4 py-3 text-sm text-stone-300">
+      <div className="flex items-center gap-3">
+        <span className="signal-dot" />
+        <div>
+          <p className="section-label">Linked Wallet</p>
+          <p className="mono mt-1 text-sm text-stone-200">{principal ? truncatePrincipal(principal, 8) : "No wallet"}</p>
+        </div>
+      </div>
+      <span className="mono text-[11px] uppercase tracking-[0.24em] text-stone-500">{network}</span>
     </div>
   );
 }

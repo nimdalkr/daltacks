@@ -8,18 +8,20 @@ interface ActivityFeedProps {
 
 export function ActivityFeed({ items, network }: ActivityFeedProps) {
   return (
-    <section className="glass rounded-[2rem] border border-white/10 p-6 shadow-panel">
+    <section className="tactical-panel panel-cut rounded-[1.9rem] p-5 md:p-6">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Recent Activity</p>
-          <h2 className="mt-3 text-2xl font-semibold text-white">Wallet transaction feed</h2>
+          <p className="section-label">Recent Activity</p>
+          <h2 className="mt-3 text-2xl font-semibold uppercase tracking-[-0.03em] text-stone-100">
+            Wallet Transaction Feed
+          </h2>
         </div>
-        <p className="text-sm text-slate-400">Latest on-chain activity for the connected Stacks address.</p>
+        <p className="mono text-[11px] uppercase tracking-[0.2em] text-stone-500">Indexed Mainnet Flow</p>
       </div>
 
       <div className="mt-6 space-y-3">
         {items.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-white/10 px-4 py-6 text-sm text-slate-400">
+          <div className="tactical-empty panel-cut rounded-[1.35rem] px-4 py-6 text-sm text-stone-400">
             No on-chain transactions found for this address yet.
           </div>
         ) : null}
@@ -27,24 +29,24 @@ export function ActivityFeed({ items, network }: ActivityFeedProps) {
         {items.map((item) => (
           <article
             key={item.txId}
-            className="rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-4 transition hover:border-teal/40"
+            className="metric-card panel-cut rounded-[1.35rem] px-4 py-4 transition hover:border-[rgba(255,123,0,0.4)]"
           >
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
-                <p className="text-sm font-medium text-white">{item.title}</p>
-                {item.subtitle ? <p className="mt-1 text-sm text-slate-400">{item.subtitle}</p> : null}
-                <p className="mt-1 text-xs uppercase tracking-[0.2em] text-slate-500">
+                <p className="text-sm font-medium uppercase tracking-[0.03em] text-stone-100">{item.title}</p>
+                {item.subtitle ? <p className="mono mt-1 text-xs text-stone-400">{item.subtitle}</p> : null}
+                <p className="mono mt-2 text-[11px] uppercase tracking-[0.2em] text-stone-500">
                   {item.status} {item.blockHeight !== null ? `- block ${item.blockHeight}` : ""}
                 </p>
               </div>
 
               <div className="text-right">
-                <p className="text-xs text-slate-400">{item.timestampIso ?? "Pending timestamp"}</p>
+                <p className="mono text-[11px] text-stone-500">{item.timestampIso ?? "Pending timestamp"}</p>
                 <a
                   href={getExplorerTxUrl(network, item.txId)}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-1 block text-xs text-amber-200 transition hover:text-amber-100"
+                  className="mono mt-2 block text-xs text-orange-200 transition hover:text-orange-100"
                 >
                   {truncatePrincipal(item.txId, 10)}
                 </a>

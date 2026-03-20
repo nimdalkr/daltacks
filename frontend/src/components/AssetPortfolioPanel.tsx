@@ -7,11 +7,11 @@ interface AssetPortfolioPanelProps {
 
 export function AssetPortfolioPanel({ portfolio }: AssetPortfolioPanelProps) {
   return (
-    <section className="glass rounded-[2rem] border border-white/10 p-6 shadow-panel">
+    <section className="tactical-panel panel-cut rounded-[1.9rem] p-5 md:p-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Portfolio</p>
-          <h2 className="mt-3 text-2xl font-semibold text-white">Wallet assets</h2>
+          <p className="section-label">Portfolio</p>
+          <h2 className="mt-3 text-2xl font-semibold uppercase tracking-[-0.03em] text-stone-100">Wallet Assets</h2>
         </div>
 
         <div className="grid gap-3 md:grid-cols-2">
@@ -47,26 +47,29 @@ function AssetList({
 }) {
   return (
     <div className="space-y-3">
-      <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{title}</p>
+      <div className="flex items-center gap-3">
+        <p className="section-label">{title}</p>
+        <div className="section-rule flex-1" />
+      </div>
 
       {items.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-white/10 px-4 py-6 text-sm text-slate-400">
+        <div className="tactical-empty panel-cut rounded-[1.35rem] px-4 py-6 text-sm text-stone-400">
           {emptyText}
         </div>
       ) : null}
 
       {items.map((item) => (
-        <article key={item.assetId} className="rounded-3xl border border-white/10 bg-slate-950/45 p-4">
+        <article key={item.assetId} className="metric-card panel-cut rounded-[1.35rem] p-4">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-sm font-medium text-white">{item.name}</p>
-              <p className="mt-1 text-xs uppercase tracking-[0.2em] text-slate-500">{item.symbol}</p>
-              <p className="mt-2 text-sm text-slate-400">{truncatePrincipal(item.contractId, 10)}</p>
+              <p className="text-sm font-medium uppercase tracking-[0.03em] text-stone-100">{item.name}</p>
+              <p className="mono mt-1 text-xs uppercase tracking-[0.2em] text-stone-500">{item.symbol}</p>
+              <p className="mono mt-2 text-xs text-stone-400">{truncatePrincipal(item.contractId, 10)}</p>
             </div>
 
             <div className="text-right">
-              <p className="text-lg font-semibold text-white">{item.balance}</p>
-              <p className="mt-1 text-xs text-slate-500">{item.rawBalance}</p>
+              <p className="text-lg font-semibold text-orange-200">{item.balance}</p>
+              <p className="mono mt-1 text-xs text-stone-500">{item.rawBalance}</p>
             </div>
           </div>
         </article>
@@ -77,9 +80,9 @@ function AssetList({
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-950/45 px-4 py-3 text-right">
-      <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{label}</p>
-      <p className="mt-2 text-2xl font-semibold text-white">{value}</p>
+    <div className="metric-card panel-cut rounded-[1.2rem] px-4 py-3 text-right">
+      <p className="section-label">{label}</p>
+      <p className="mono mt-3 text-2xl font-semibold text-stone-100">{value}</p>
     </div>
   );
 }

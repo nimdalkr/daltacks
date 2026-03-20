@@ -13,18 +13,17 @@ export function WalletConnectButton({
     <button
       type="button"
       onClick={onDisconnect}
-      className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white transition hover:border-coral/60"
+      className="tactical-button-secondary panel-cut rounded-[1rem] px-4 py-3 text-sm uppercase tracking-[0.18em]"
     >
-      Disconnect
+      Disconnect Wallet
     </button>
   ) : (
     <button
       type="button"
       onClick={onConnect}
-      className="rounded-full bg-teal px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-600"
+      className="tactical-button panel-cut rounded-[1rem] px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em]"
     >
       Connect Wallet
     </button>
   );
 }
-
