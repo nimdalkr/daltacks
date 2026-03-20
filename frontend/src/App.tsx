@@ -69,21 +69,19 @@ export default function App() {
 
       {wallet.isSignedIn ? (
         <section className="mt-6 space-y-6">
-          <div className="grid gap-6 xl:grid-cols-[1.08fr_0.92fr]">
-            <div className="space-y-6">
-              {portfolioQuery.isLoading ? <InlineState message="Loading wallet assets..." tone="loading" /> : null}
+          <div className="space-y-6">
+            {portfolioQuery.isLoading ? <InlineState message="Loading wallet assets..." tone="loading" /> : null}
 
-              {portfolioQuery.error instanceof Error ? (
-                <InlineState message={portfolioQuery.error.message} tone="error" />
-              ) : null}
+            {portfolioQuery.error instanceof Error ? (
+              <InlineState message={portfolioQuery.error.message} tone="error" />
+            ) : null}
 
-              {!portfolioQuery.isLoading && !portfolioQuery.error && portfolioQuery.data ? (
-                <AssetPortfolioPanel
-                  portfolio={portfolioQuery.data}
-                  network={NETWORK as "mainnet" | "testnet" | "devnet"}
-                />
-              ) : null}
-            </div>
+            {!portfolioQuery.isLoading && !portfolioQuery.error && portfolioQuery.data ? (
+              <AssetPortfolioPanel
+                portfolio={portfolioQuery.data}
+                network={NETWORK as "mainnet" | "testnet" | "devnet"}
+              />
+            ) : null}
           </div>
 
           <div className="space-y-6">

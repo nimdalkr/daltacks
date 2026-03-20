@@ -313,18 +313,24 @@ export async function getWalletPortfolio(principal: string): Promise<WalletPortf
   const fungibleTokens = assetEntries
     .map((item) => {
       const metadata = metadataByContract.get(item.contractId) ?? null;
-      const decimals = metadata?.decimals ?? null;
+
+      if (!metadata) {
+        return null;
+      }
+
+      const decimals = metadata.decimals ?? null;
 
       return {
         assetId: item.assetId,
         contractId: item.contractId,
-        name: metadata?.name ?? inferTokenName(item.assetId),
-        symbol: metadata?.symbol ?? inferTokenName(item.assetId).toUpperCase(),
+        name: metadata.name,
+        symbol: metadata.symbol,
         rawBalance: item.rawBalance,
         balance: formatTokenBalance(item.rawBalance, decimals),
         decimals
       } satisfies TokenHolding;
     })
+    .filter((item): item is TokenHolding => item !== null)
     .sort((left, right) => compareRawBalances(left.rawBalance, right.rawBalance));
 
   const lockedStx = fromMicroStx(payload.stx?.locked) ?? null;
