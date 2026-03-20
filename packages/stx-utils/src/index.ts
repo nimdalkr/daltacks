@@ -48,6 +48,21 @@ export function getExplorerTxUrl(network: StacksNetworkName, txid: string): stri
   }
 }
 
+export function getExplorerPrincipalUrl(network: StacksNetworkName, principal: string): string {
+  const normalized = encodeURIComponent(principal);
+
+  switch (network) {
+    case "mainnet":
+      return `https://explorer.hiro.so/address/${normalized}`;
+    case "testnet":
+      return `https://explorer.hiro.so/address/${normalized}?chain=testnet`;
+    case "devnet":
+      return `http://localhost:8000/address/${normalized}?chain=testnet`;
+    default:
+      return `https://explorer.hiro.so/address/${normalized}`;
+  }
+}
+
 export function fromMicroStx(value: bigint | number | string | null | undefined): number | null {
   if (value === null || value === undefined) {
     return null;

@@ -27,8 +27,11 @@ export function ActivityFeed({ items, network }: ActivityFeedProps) {
         ) : null}
 
         {items.map((item) => (
-          <article
+          <a
             key={item.txId}
+            href={getExplorerTxUrl(network, item.txId)}
+            target="_blank"
+            rel="noreferrer"
             className="metric-card panel-cut rounded-[1.35rem] px-4 py-4 transition hover:border-[rgba(255,123,0,0.4)]"
           >
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -42,17 +45,12 @@ export function ActivityFeed({ items, network }: ActivityFeedProps) {
 
               <div className="text-right">
                 <p className="mono text-[11px] text-stone-500">{item.timestampIso ?? "Pending timestamp"}</p>
-                <a
-                  href={getExplorerTxUrl(network, item.txId)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mono mt-2 block text-xs text-orange-200 transition hover:text-orange-100"
-                >
+                <span className="mono mt-2 block text-xs text-orange-200 transition hover:text-orange-100">
                   {truncatePrincipal(item.txId, 10)}
-                </a>
+                </span>
               </div>
             </div>
-          </article>
+          </a>
         ))}
       </div>
     </section>

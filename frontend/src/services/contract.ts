@@ -170,7 +170,11 @@ function inferTokenName(assetId: string) {
 
 function isDefiLikeHolding(item: TokenHolding) {
   const value = `${item.name} ${item.symbol} ${item.contractId}`.toLowerCase();
-  return /(lp|pool|vault|stake|staked|yield|farm|liquidity|receipt|share)/.test(value);
+  const compact = value.replace(/[^a-z0-9]/g, "");
+  return (
+    /(lp|pool|vault|stake|staked|yield|farm|liquidity|receipt|share|restake|restaked|liquid)/.test(value) ||
+    /(ststx|rststx|ststxbtc|sstx|lst)/.test(compact)
+  );
 }
 
 function compareRawBalances(left: string, right: string) {

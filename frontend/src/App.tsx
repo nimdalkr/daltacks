@@ -8,6 +8,14 @@ import { useRecentActivity, useWalletPortfolio } from "./hooks/useTracker";
 import { useWalletSession } from "./hooks/useWalletSession";
 
 const NETWORK = import.meta.env.VITE_STACKS_NETWORK ?? "mainnet";
+const ECOSYSTEM_LINKS = [
+  { label: "Stacks", href: "https://www.stacks.co/" },
+  { label: "Zest Protocol", href: "https://www.zestprotocol.com/" },
+  { label: "Stacking DAO", href: "https://www.stackingdao.com/" },
+  { label: "Velar", href: "https://www.velar.co/" },
+  { label: "Bitflow", href: "https://www.bitflow.finance/" },
+  { label: "Hiro Explorer", href: "https://explorer.hiro.so/" }
+] as const;
 
 export default function App() {
   const wallet = useWalletSession();
@@ -32,7 +40,7 @@ export default function App() {
             <div className="max-w-4xl">
               <p className="section-label">Stacks Wallet Activity</p>
               <h1 className="mt-4 max-w-4xl text-4xl font-semibold uppercase leading-[0.95] tracking-[-0.04em] text-stone-100 md:text-7xl">
-                Competitive clarity for mainnet wallet intelligence.
+                DALTACKS
               </h1>
               <p className="mt-5 max-w-2xl text-sm leading-7 text-stone-400 md:text-base">
                 A stylized tactical console for holdings, inferred DeFi exposure, and recent transaction flow.
@@ -80,7 +88,10 @@ export default function App() {
               ) : null}
 
               {!portfolioQuery.isLoading && !portfolioQuery.error && portfolioQuery.data ? (
-                <AssetPortfolioPanel portfolio={portfolioQuery.data} />
+                <AssetPortfolioPanel
+                  portfolio={portfolioQuery.data}
+                  network={NETWORK as "mainnet" | "testnet" | "devnet"}
+                />
               ) : null}
             </div>
 
@@ -126,6 +137,36 @@ export default function App() {
           </div>
         </section>
       ) : null}
+
+      <footer className="mt-6">
+        <section className="tactical-panel panel-cut rounded-[1.8rem] p-5 md:p-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="section-label">Stacks Ecosystem</p>
+              <h2 className="mt-3 text-2xl font-semibold uppercase tracking-[-0.03em] text-stone-100">
+                Representative DeFi & dApp Links
+              </h2>
+            </div>
+            <span className="mono text-[11px] uppercase tracking-[0.24em] text-stone-500">Bitcoin DeFi Surface</span>
+          </div>
+
+          <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {ECOSYSTEM_LINKS.map((item) => (
+              <a
+                key={item.label}
+                href={item.href}
+                target="_blank"
+                rel="noreferrer"
+                className="metric-card panel-cut rounded-[1.2rem] px-4 py-4 transition hover:border-[rgba(255,123,0,0.4)]"
+              >
+                <p className="section-label">External Link</p>
+                <p className="mt-3 text-lg font-semibold uppercase tracking-[0.02em] text-stone-100">{item.label}</p>
+                <p className="mono mt-2 text-xs text-stone-500">{item.href.replace(/^https?:\/\//, "")}</p>
+              </a>
+            ))}
+          </div>
+        </section>
+      </footer>
     </main>
   );
 }

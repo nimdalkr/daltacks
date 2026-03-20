@@ -1,11 +1,12 @@
-import { truncatePrincipal } from "@daltacks/stx-utils";
+import { getExplorerPrincipalUrl, truncatePrincipal, type StacksNetworkName } from "@daltacks/stx-utils";
 import type { TokenHolding, WalletPortfolio } from "../types/tracker";
 
 interface AssetPortfolioPanelProps {
   portfolio: WalletPortfolio;
+  network: StacksNetworkName;
 }
 
-export function AssetPortfolioPanel({ portfolio }: AssetPortfolioPanelProps) {
+export function AssetPortfolioPanel({ portfolio, network }: AssetPortfolioPanelProps) {
   return (
     <section className="tactical-panel panel-cut rounded-[1.9rem] p-5 md:p-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -25,11 +26,13 @@ export function AssetPortfolioPanel({ portfolio }: AssetPortfolioPanelProps) {
           title="Token Holdings"
           emptyText="No fungible token balances found for this address."
           items={portfolio.fungibleTokens}
+          network={network}
         />
         <AssetList
           title="DeFi Exposure"
           emptyText="No DeFi-like LP, vault, or staked token positions were inferred."
           items={portfolio.defiTokens}
+          network={network}
         />
       </div>
     </section>
@@ -39,11 +42,13 @@ export function AssetPortfolioPanel({ portfolio }: AssetPortfolioPanelProps) {
 function AssetList({
   title,
   emptyText,
-  items
+  items,
+  network
 }: {
   title: string;
   emptyText: string;
   items: TokenHolding[];
+  network: StacksNetworkName;
 }) {
   return (
     <div className="space-y-3">
@@ -59,7 +64,13 @@ function AssetList({
       ) : null}
 
       {items.map((item) => (
-        <article key={item.assetId} className="metric-card panel-cut rounded-[1.35rem] p-4">
+        <a
+          key={item.assetId}
+          href={getExplorerPrincipalUrl(network, item.contractId)}
+          target="_blank"
+          rel="noreferrer"
+          className="metric-card panel-cut block rounded-[1.35rem] p-4 transition hover:border-[rgba(255,123,0,0.4)]"
+        >
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-sm font-medium uppercase tracking-[0.03em] text-stone-100">{item.name}</p>
@@ -72,7 +83,7 @@ function AssetList({
               <p className="mono mt-1 text-xs text-stone-500">{item.rawBalance}</p>
             </div>
           </div>
-        </article>
+        </a>
       ))}
     </div>
   );
