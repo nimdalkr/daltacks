@@ -10,7 +10,7 @@ import { useDashboard, useRecentActivity } from "./hooks/useTracker";
 // import { useCreateSnapshot, useCheckIn } from "./hooks/useTracker";
 import { useWalletSession } from "./hooks/useWalletSession";
 
-const NETWORK = import.meta.env.VITE_STACKS_NETWORK ?? "testnet";
+const NETWORK = import.meta.env.VITE_STACKS_NETWORK ?? "mainnet";
 
 export default function App() {
   const wallet = useWalletSession();

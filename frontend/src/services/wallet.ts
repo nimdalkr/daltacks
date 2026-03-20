@@ -1,7 +1,7 @@
 import { connect, disconnect, getLocalStorage, isConnected } from "@stacks/connect";
 import type { StacksNetworkName } from "@daltacks/stx-utils";
 
-const NETWORK = (import.meta.env.VITE_STACKS_NETWORK ?? "testnet") as StacksNetworkName;
+const NETWORK = (import.meta.env.VITE_STACKS_NETWORK ?? "mainnet") as StacksNetworkName;
 
 function resolvePrincipal() {
   if (!isConnected()) {

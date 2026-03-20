@@ -24,7 +24,7 @@ import {
 import type { ActivityItem } from "../types/tracker";
 // import type { SubmittedTx } from "../types/tracker";
 
-const NETWORK = (import.meta.env.VITE_STACKS_NETWORK ?? "testnet") as StacksNetworkName;
+const NETWORK = (import.meta.env.VITE_STACKS_NETWORK ?? "mainnet") as StacksNetworkName;
 const API_BASE_URL = import.meta.env.VITE_STACKS_API_BASE_URL ?? getStacksApiBaseUrl(NETWORK);
 const CONTRACT_NAME = import.meta.env.VITE_CONTRACT_NAME ?? "tracker";
 const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS ?? "ST000000000000000000002AMW42H";

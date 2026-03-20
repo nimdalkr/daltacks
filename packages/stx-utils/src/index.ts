@@ -29,7 +29,7 @@ export function getStacksApiBaseUrl(network: StacksNetworkName): string {
     case "devnet":
       return "http://localhost:3999";
     default:
-      return "https://api.testnet.hiro.so";
+      return "https://api.hiro.so";
   }
 }
 
@@ -44,7 +44,7 @@ export function getExplorerTxUrl(network: StacksNetworkName, txid: string): stri
     case "devnet":
       return `http://localhost:8000/txid/${normalized}?chain=testnet`;
     default:
-      return `https://explorer.hiro.so/txid/${normalized}?chain=testnet`;
+      return `https://explorer.hiro.so/txid/${normalized}`;
   }
 }
 

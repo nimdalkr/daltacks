@@ -22,11 +22,11 @@ Use [frontend/.env.example](/C:/Users/Admin/Desktop/5_Crypto/Stacks/daltacks/fro
 - `VITE_CONTRACT_ADDRESS`
 - `VITE_CONTRACT_NAME`
 
-For testnet, a typical set is:
+For mainnet, a typical set is:
 
 ```env
-VITE_STACKS_NETWORK=testnet
-VITE_STACKS_API_BASE_URL=https://api.testnet.hiro.so
+VITE_STACKS_NETWORK=mainnet
+VITE_STACKS_API_BASE_URL=https://api.hiro.so
 VITE_CONTRACT_ADDRESS=ST...
 VITE_CONTRACT_NAME=tracker
 ```
