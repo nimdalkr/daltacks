@@ -64,13 +64,17 @@ function AssetList({
       ) : null}
 
       {items.map((item) => (
-        <a
+        <article
           key={item.assetId}
-          href={getExplorerPrincipalUrl(network, item.contractId)}
-          target="_blank"
-          rel="noreferrer"
-          className="metric-card panel-cut block rounded-[1.35rem] p-4 transition hover:border-[rgba(255,123,0,0.4)]"
+          className="metric-card panel-cut relative rounded-[1.35rem] p-4 transition hover:border-[rgba(255,123,0,0.4)]"
         >
+          <a
+            href={getExplorerPrincipalUrl(network, item.contractId)}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={`Open ${item.contractId} in explorer`}
+            className="absolute inset-0 z-10"
+          />
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-sm font-medium uppercase tracking-[0.03em] text-stone-100">{item.name}</p>
@@ -83,7 +87,7 @@ function AssetList({
               <p className="mono mt-1 text-xs text-stone-500">{item.rawBalance}</p>
             </div>
           </div>
-        </a>
+        </article>
       ))}
     </div>
   );

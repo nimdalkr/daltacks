@@ -27,13 +27,17 @@ export function ActivityFeed({ items, network }: ActivityFeedProps) {
         ) : null}
 
         {items.map((item) => (
-          <a
+          <article
             key={item.txId}
-            href={getExplorerTxUrl(network, item.txId)}
-            target="_blank"
-            rel="noreferrer"
-            className="metric-card panel-cut block rounded-[1.35rem] px-4 py-4 transition hover:border-[rgba(255,123,0,0.4)]"
+            className="metric-card panel-cut relative rounded-[1.35rem] px-4 py-4 transition hover:border-[rgba(255,123,0,0.4)]"
           >
+            <a
+              href={getExplorerTxUrl(network, item.txId)}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`Open transaction ${item.txId} in explorer`}
+              className="absolute inset-0 z-10"
+            />
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
                 <p className="text-sm font-medium uppercase tracking-[0.03em] text-stone-100">{item.title}</p>
@@ -50,7 +54,7 @@ export function ActivityFeed({ items, network }: ActivityFeedProps) {
                 </span>
               </div>
             </div>
-          </a>
+          </article>
         ))}
       </div>
     </section>
