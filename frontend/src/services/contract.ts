@@ -38,6 +38,7 @@ const DIRECT_PRICE_IDS_BY_SYMBOL: Record<string, string> = {
 };
 const STX_PEG_SYMBOLS = new Set(["STSTX", "RSTSTX", "LSTSTX", "WSTSTX"]);
 const USD_PEG_SYMBOLS = new Set(["USDA", "AEUSDC", "USDC", "USDT"]);
+const MIN_VISIBLE_ASSET_VALUE_USD = 1;
 
 export const trackerConfig: TrackerSdkConfig = {
   network: NETWORK,
@@ -219,6 +220,10 @@ function toUsdValue(balance: string, unitPriceUsd: number | null) {
   }
 
   return quantity * unitPriceUsd;
+}
+
+function shouldDisplayAsset(item: Pick<TokenHolding, "valueUsd">) {
+  return item.valueUsd === null || item.valueUsd >= MIN_VISIBLE_ASSET_VALUE_USD;
 }
 
 async function fetchKnownUsdPrices() {
@@ -450,6 +455,7 @@ export async function getWalletPortfolio(principal: string): Promise<WalletPortf
       } satisfies TokenHolding;
     })
     .filter((item): item is TokenHolding => item !== null)
+    .filter(shouldDisplayAsset)
     .sort((left, right) => compareRawBalances(left.rawBalance, right.rawBalance));
 
   const lockedStx = fromMicroStx(payload.stx?.locked) ?? null;
