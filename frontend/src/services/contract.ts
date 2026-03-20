@@ -1,4 +1,4 @@
-import { request } from "@stacks/connect";
+// import { request } from "@stacks/connect";
 import {
   bufferCV,
   cvToHex,
@@ -9,21 +9,20 @@ import {
 } from "@stacks/transactions";
 import {
   fromMicroStx,
-  getExplorerTxUrl,
   getStacksApiBaseUrl,
   type StacksNetworkName
 } from "@daltacks/stx-utils";
 import {
   TrackerSdk,
   type ContractArg,
-  type ContractCallDraft,
   type ReadOnlyRequest,
   type SnapshotRecord,
   type TrackerSdkConfig,
   type TrackerTransport
 } from "@daltacks/tracker-sdk";
+// import { type ContractCallDraft } from "@daltacks/tracker-sdk";
 import type { ActivityItem } from "../types/tracker";
-import type { SubmittedTx } from "../types/tracker";
+// import type { SubmittedTx } from "../types/tracker";
 
 const NETWORK = (import.meta.env.VITE_STACKS_NETWORK ?? "testnet") as StacksNetworkName;
 const API_BASE_URL = import.meta.env.VITE_STACKS_API_BASE_URL ?? getStacksApiBaseUrl(NETWORK);
@@ -248,6 +247,7 @@ export async function getRecentActivity(principal: string, limit = 12): Promise<
     }));
 }
 
+/*
 async function submitContractCall(draft: ContractCallDraft): Promise<SubmittedTx> {
   const result = await request("stx_callContract", {
     contract: `${draft.contractAddress}.${draft.contractName}`,
@@ -270,3 +270,4 @@ export async function createSnapshot(commitmentHashHex: string, dueAtHeight: num
 export async function submitCheckIn(proofHashHex: string) {
   return submitContractCall(trackerSdk.buildCheckInTx({ proofHashHex }));
 }
+*/

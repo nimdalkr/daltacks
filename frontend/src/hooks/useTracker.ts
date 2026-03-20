@@ -1,13 +1,11 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+// import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  createSnapshot,
   createTrackerTransport,
-  getCurrentBlockHeight,
   getRecentActivity,
-  hashTextToHex,
-  submitCheckIn,
   trackerSdk
 } from "../services/contract";
+// import { createSnapshot, getCurrentBlockHeight, hashTextToHex, submitCheckIn } from "../services/contract";
 
 const transport = createTrackerTransport();
 
@@ -27,6 +25,7 @@ export function useRecentActivity(principal: string | null) {
   });
 }
 
+/*
 export function useCreateSnapshot(principal: string | null) {
   const queryClient = useQueryClient();
 
@@ -65,3 +64,4 @@ export function useCheckIn(principal: string | null) {
     }
   });
 }
+*/

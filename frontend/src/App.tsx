@@ -1,12 +1,13 @@
 import { ActivityFeed } from "./components/ActivityFeed";
 import { ActiveSnapshotCard } from "./components/ActiveSnapshotCard";
-import { CheckInPanel } from "./components/CheckInPanel";
-import { CreateSnapshotPanel } from "./components/CreateSnapshotPanel";
+// import { CheckInPanel } from "./components/CheckInPanel";
+// import { CreateSnapshotPanel } from "./components/CreateSnapshotPanel";
 import { EmptyState } from "./components/EmptyState";
 import { InlineState } from "./components/InlineState";
 import { WalletConnectButton } from "./components/WalletConnectButton";
 import { WalletStatusPill } from "./components/WalletStatusPill";
-import { useCreateSnapshot, useCheckIn, useDashboard, useRecentActivity } from "./hooks/useTracker";
+import { useDashboard, useRecentActivity } from "./hooks/useTracker";
+// import { useCreateSnapshot, useCheckIn } from "./hooks/useTracker";
 import { useWalletSession } from "./hooks/useWalletSession";
 
 const NETWORK = import.meta.env.VITE_STACKS_NETWORK ?? "testnet";
@@ -15,8 +16,10 @@ export default function App() {
   const wallet = useWalletSession();
   const dashboardQuery = useDashboard(wallet.principal);
   const activityQuery = useRecentActivity(wallet.principal);
-  const createSnapshotMutation = useCreateSnapshot(wallet.principal);
-  const checkInMutation = useCheckIn(wallet.principal);
+  // Snapshot / check-in write flows are intentionally disabled for the current
+  // read-only explorer mode.
+  // const createSnapshotMutation = useCreateSnapshot(wallet.principal);
+  // const checkInMutation = useCheckIn(wallet.principal);
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 py-8 text-slate-100 md:px-8">
@@ -86,6 +89,11 @@ export default function App() {
           </div>
 
           <div className="space-y-6">
+            {/*
+            Snapshot / check-in creation UI is disabled. The current product
+            direction is to keep this surface read-only instead of prompting the
+            user to submit contract writes.
+
             {!dashboardQuery.data?.activeSnapshot ? (
               <CreateSnapshotPanel
                 isPending={createSnapshotMutation.isPending}
@@ -102,6 +110,11 @@ export default function App() {
                 lastSubmittedTx={checkInMutation.data ?? null}
               />
             )}
+            */}
+            <EmptyState
+              title="Write actions are disabled."
+              body="Snapshot creation and check-ins remain in the codebase, but they are currently commented out so this frontend stays read-only."
+            />
           </div>
         </section>
       ) : null}
