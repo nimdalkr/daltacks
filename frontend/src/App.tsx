@@ -119,7 +119,7 @@ export default function App() {
                 href={item.href}
                 target="_blank"
                 rel="noreferrer"
-                className="metric-card panel-cut rounded-[1.2rem] px-4 py-4 transition hover:border-[rgba(255,123,0,0.4)]"
+                className="metric-card panel-cut block rounded-[1.2rem] px-4 py-4 transition hover:border-[rgba(255,123,0,0.4)]"
               >
                 <p className="section-label">External Link</p>
                 <p className="mt-3 text-lg font-semibold uppercase tracking-[0.02em] text-stone-100">{item.label}</p>

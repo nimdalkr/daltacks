@@ -32,7 +32,7 @@ export function ActivityFeed({ items, network }: ActivityFeedProps) {
             href={getExplorerTxUrl(network, item.txId)}
             target="_blank"
             rel="noreferrer"
-            className="metric-card panel-cut rounded-[1.35rem] px-4 py-4 transition hover:border-[rgba(255,123,0,0.4)]"
+            className="metric-card panel-cut block rounded-[1.35rem] px-4 py-4 transition hover:border-[rgba(255,123,0,0.4)]"
           >
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
