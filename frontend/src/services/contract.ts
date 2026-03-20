@@ -26,8 +26,18 @@ import type { ActivityItem, TokenHolding, WalletPortfolio } from "../types/track
 
 const NETWORK = (import.meta.env.VITE_STACKS_NETWORK ?? "mainnet") as StacksNetworkName;
 const API_BASE_URL = import.meta.env.VITE_STACKS_API_BASE_URL ?? getStacksApiBaseUrl(NETWORK);
+const COINGECKO_API_BASE_URL = import.meta.env.VITE_COINGECKO_API_BASE_URL ?? "https://api.coingecko.com/api/v3";
+const COINGECKO_DEMO_API_KEY = import.meta.env.VITE_COINGECKO_DEMO_API_KEY ?? "";
 const CONTRACT_NAME = import.meta.env.VITE_CONTRACT_NAME ?? "tracker";
 const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS ?? "ST000000000000000000002AMW42H";
+const DIRECT_PRICE_IDS_BY_SYMBOL: Record<string, string> = {
+  STX: "stacks",
+  STSTX: "stacking-dao",
+  DIKO: "arkadiko",
+  ZEST: "zest-protocol"
+};
+const STX_PEG_SYMBOLS = new Set(["STSTX", "RSTSTX", "LSTSTX", "WSTSTX"]);
+const USD_PEG_SYMBOLS = new Set(["USDA", "AEUSDC", "USDC", "USDT"]);
 
 export const trackerConfig: TrackerSdkConfig = {
   network: NETWORK,
@@ -168,6 +178,10 @@ function inferTokenName(assetId: string) {
   return assetId.split("::")[1] ?? assetId;
 }
 
+function normalizeTokenKey(value: string) {
+  return value.replace(/[^a-z0-9]/gi, "").toUpperCase();
+}
+
 function isDefiLikeHolding(item: TokenHolding) {
   const value = `${item.name} ${item.symbol} ${item.contractId}`.toLowerCase();
   const compact = value.replace(/[^a-z0-9]/g, "");
@@ -186,6 +200,98 @@ function compareRawBalances(left: string, right: string) {
   }
 
   return leftValue > rightValue ? -1 : 1;
+}
+
+function toFiniteNumber(value: string | number | null | undefined) {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  const parsed = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function toUsdValue(balance: string, unitPriceUsd: number | null) {
+  const quantity = toFiniteNumber(balance);
+
+  if (quantity === null || unitPriceUsd === null) {
+    return null;
+  }
+
+  return quantity * unitPriceUsd;
+}
+
+async function fetchKnownUsdPrices() {
+  const coinIds = Array.from(new Set(Object.values(DIRECT_PRICE_IDS_BY_SYMBOL)));
+  const endpoint = new URL(`${COINGECKO_API_BASE_URL}/simple/price`);
+  endpoint.searchParams.set("ids", coinIds.join(","));
+  endpoint.searchParams.set("vs_currencies", "usd");
+
+  if (COINGECKO_DEMO_API_KEY) {
+    endpoint.searchParams.set("x_cg_demo_api_key", COINGECKO_DEMO_API_KEY);
+  }
+
+  try {
+    const response = await fetch(endpoint.toString());
+
+    if (!response.ok) {
+      return new Map<string, number>();
+    }
+
+    const payload = (await response.json()) as Record<string, { usd?: number }>;
+
+    return new Map(
+      Object.entries(payload)
+        .map(([coinId, value]) => [coinId, value.usd] as const)
+        .filter((entry): entry is readonly [string, number] => typeof entry[1] === "number")
+    );
+  } catch {
+    return new Map<string, number>();
+  }
+}
+
+function resolveTokenPrice(
+  item: Pick<TokenHolding, "name" | "symbol">,
+  knownUsdPrices: Map<string, number>
+): Pick<TokenHolding, "unitPriceUsd" | "priceSource"> {
+  const symbol = normalizeTokenKey(item.symbol);
+  const name = normalizeTokenKey(item.name);
+  const directCoinId = DIRECT_PRICE_IDS_BY_SYMBOL[symbol];
+
+  if (directCoinId) {
+    const unitPriceUsd = knownUsdPrices.get(directCoinId) ?? null;
+
+    if (unitPriceUsd !== null) {
+      return {
+        unitPriceUsd,
+        priceSource: "market"
+      };
+    }
+  }
+
+  const stxPriceUsd = knownUsdPrices.get("stacks") ?? null;
+
+  if (
+    stxPriceUsd !== null &&
+    (STX_PEG_SYMBOLS.has(symbol) || /STACKEDSTACKS|RESTAKEDSTACKS|LIQUIDSTACKS/.test(name))
+  ) {
+    return {
+      unitPriceUsd: stxPriceUsd,
+      priceSource: "stx-peg"
+    };
+  }
+
+  if (USD_PEG_SYMBOLS.has(symbol) || /USDCOIN|ARKADIKODOLLAR|USDA/.test(name)) {
+    return {
+      unitPriceUsd: 1,
+      priceSource: "usd-peg"
+    };
+  }
+
+  return {
+    unitPriceUsd: null,
+    priceSource: null
+  };
 }
 
 async function fetchTokenMetadata(contractId: string) {
@@ -299,6 +405,8 @@ export async function getWalletPortfolio(principal: string): Promise<WalletPortf
     }))
     .filter((item) => item.rawBalance !== "0");
 
+  const knownUsdPrices = await fetchKnownUsdPrices();
+
   const metadataByContract = new Map(
     (
       await Promise.all(
@@ -319,6 +427,14 @@ export async function getWalletPortfolio(principal: string): Promise<WalletPortf
       }
 
       const decimals = metadata.decimals ?? null;
+      const balance = formatTokenBalance(item.rawBalance, decimals);
+      const price = resolveTokenPrice(
+        {
+          name: metadata.name,
+          symbol: metadata.symbol
+        },
+        knownUsdPrices
+      );
 
       return {
         assetId: item.assetId,
@@ -326,14 +442,19 @@ export async function getWalletPortfolio(principal: string): Promise<WalletPortf
         name: metadata.name,
         symbol: metadata.symbol,
         rawBalance: item.rawBalance,
-        balance: formatTokenBalance(item.rawBalance, decimals),
-        decimals
+        balance,
+        decimals,
+        unitPriceUsd: price.unitPriceUsd,
+        valueUsd: toUsdValue(balance, price.unitPriceUsd),
+        priceSource: price.priceSource
       } satisfies TokenHolding;
     })
     .filter((item): item is TokenHolding => item !== null)
     .sort((left, right) => compareRawBalances(left.rawBalance, right.rawBalance));
 
   const lockedStx = fromMicroStx(payload.stx?.locked) ?? null;
+  const stxBalance = fromMicroStx(payload.stx?.balance) ?? null;
+  const stxPriceUsd = knownUsdPrices.get("stacks") ?? null;
   const defiTokens = fungibleTokens.filter(isDefiLikeHolding);
 
   if (lockedStx && lockedStx > 0) {
@@ -344,13 +465,19 @@ export async function getWalletPortfolio(principal: string): Promise<WalletPortf
       symbol: "STX",
       rawBalance: String(payload.stx?.locked ?? "0"),
       balance: `${lockedStx.toFixed(2)} STX`,
-      decimals: 6
+      decimals: 6,
+      unitPriceUsd: stxPriceUsd,
+      valueUsd: stxPriceUsd !== null ? lockedStx * stxPriceUsd : null,
+      priceSource: stxPriceUsd !== null ? "market" : null
     });
   }
 
   return {
-    stxBalance: fromMicroStx(payload.stx?.balance) ?? null,
+    stxBalance,
     lockedStx,
+    stxPriceUsd,
+    stxValueUsd: stxBalance !== null && stxPriceUsd !== null ? stxBalance * stxPriceUsd : null,
+    lockedStxValueUsd: lockedStx !== null && stxPriceUsd !== null ? lockedStx * stxPriceUsd : null,
     fungibleTokens,
     defiTokens
   };

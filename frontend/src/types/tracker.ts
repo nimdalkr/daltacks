@@ -17,11 +17,17 @@ export interface TokenHolding {
   balance: string;
   rawBalance: string;
   decimals: number | null;
+  unitPriceUsd: number | null;
+  valueUsd: number | null;
+  priceSource: "market" | "stx-peg" | "usd-peg" | null;
 }
 
 export interface WalletPortfolio {
   stxBalance: number | null;
   lockedStx: number | null;
+  stxPriceUsd: number | null;
+  stxValueUsd: number | null;
+  lockedStxValueUsd: number | null;
   fungibleTokens: TokenHolding[];
   defiTokens: TokenHolding[];
 }
