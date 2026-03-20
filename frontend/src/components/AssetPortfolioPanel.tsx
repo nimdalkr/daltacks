@@ -9,7 +9,7 @@ interface AssetPortfolioPanelProps {
 export function AssetPortfolioPanel({ portfolio, network }: AssetPortfolioPanelProps) {
   return (
     <section className="tactical-panel panel-cut rounded-[1.9rem] p-5 md:p-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+      <div className="flex flex-col gap-4">
         <div>
           <p className="section-label">Portfolio</p>
           <h2 className="mt-3 text-2xl font-semibold uppercase tracking-[-0.03em] text-stone-100">Wallet Assets</h2>
@@ -21,7 +21,7 @@ export function AssetPortfolioPanel({ portfolio, network }: AssetPortfolioPanelP
         </div>
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+      <div className="mt-6 space-y-6">
         <AssetList
           title="Token Holdings"
           emptyText="No fungible token balances found for this address."
