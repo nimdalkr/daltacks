@@ -27,16 +27,6 @@ export default function App() {
       <header className="tactical-header panel-cut rounded-[2rem] px-5 py-5 md:px-8 md:py-7">
         <div className="hero-grid">
           <div className="space-y-6">
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="tactical-chip rounded-full px-3 py-2 text-[11px] uppercase tracking-[0.3em]">
-                <span className="signal-dot" />
-                Neo-Futuristic Industrial
-              </span>
-              <span className="tactical-chip rounded-full px-3 py-2 text-[11px] uppercase tracking-[0.3em]">
-                Tactical Minimalism
-              </span>
-            </div>
-
             <div className="max-w-4xl">
               <p className="section-label">Stacks Wallet Activity</p>
               <h1 className="mt-4 max-w-4xl text-4xl font-semibold uppercase leading-[0.95] tracking-[-0.04em] text-stone-100 md:text-7xl">
@@ -93,34 +83,6 @@ export default function App() {
                   network={NETWORK as "mainnet" | "testnet" | "devnet"}
                 />
               ) : null}
-            </div>
-
-            <div className="space-y-6">
-              <section className="tactical-panel panel-cut rounded-[1.8rem] p-5 md:p-6">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <p className="section-label">Mission Context</p>
-                    <h2 className="mt-3 text-2xl font-semibold uppercase tracking-[-0.03em] text-stone-100">
-                      Tactical minimalism, operational readability.
-                    </h2>
-                  </div>
-                  <span className="mono text-[11px] uppercase tracking-[0.24em] text-stone-500">Orange Signal</span>
-                </div>
-                <div className="mt-5 grid gap-3 md:grid-cols-2">
-                  <div className="metric-card panel-cut rounded-[1.3rem] px-4 py-4">
-                    <p className="section-label">Layout</p>
-                    <p className="mt-3 text-sm leading-6 text-stone-400">
-                      Hard edges, industrial spacing, low-noise typography, and high-contrast metrics.
-                    </p>
-                  </div>
-                  <div className="metric-card panel-cut rounded-[1.3rem] px-4 py-4">
-                    <p className="section-label">Focus</p>
-                    <p className="mt-3 text-sm leading-6 text-stone-400">
-                      Holdings and transaction flow are prioritized over decorative motion or soft cards.
-                    </p>
-                  </div>
-                </div>
-              </section>
             </div>
           </div>
 
