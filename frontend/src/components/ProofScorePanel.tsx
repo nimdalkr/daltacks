@@ -6,15 +6,15 @@ interface ProofScorePanelProps {
 
 export function ProofScorePanel({ proofScore }: ProofScorePanelProps) {
   return (
-    <section className="tactical-panel panel-cut rounded-[1.9rem] p-5 md:p-6">
+    <section className="tactical-panel panel-cut p-5 md:p-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="section-label">Proof Score</p>
-          <h2 className="mt-3 text-2xl font-semibold uppercase tracking-[-0.03em] text-stone-100">
+          <h2 className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-stone-100">
             Mainnet Builder Surface
           </h2>
         </div>
-        <div className="metric-card panel-cut rounded-[1.2rem] px-4 py-3 text-right">
+        <div className="metric-card panel-cut px-4 py-3 text-right">
           <p className="section-label">Total</p>
           <p className="mono mt-3 text-3xl font-semibold text-orange-200">{Math.round(proofScore.proofScore)}</p>
         </div>
@@ -29,14 +29,14 @@ export function ProofScorePanel({ proofScore }: ProofScorePanelProps) {
       </div>
 
       <div className="mt-6 grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-        <div className="metric-card panel-cut rounded-[1.35rem] p-4">
+        <div className="metric-card panel-cut p-4">
           <p className="section-label">Active Protocols</p>
           <div className="mt-4 flex flex-wrap gap-2">
             {proofScore.activeProtocols.length > 0 ? (
               proofScore.activeProtocols.map((protocol) => (
                 <span
                   key={protocol}
-                  className="rounded-full border border-[rgba(255,123,0,0.28)] bg-[rgba(255,123,0,0.08)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-orange-200"
+                  className="rounded-full border border-[rgba(249,115,22,0.25)] bg-[rgba(249,115,22,0.1)] px-3 py-2 text-xs font-medium text-orange-200"
                 >
                   {protocol}
                 </span>
@@ -47,12 +47,12 @@ export function ProofScorePanel({ proofScore }: ProofScorePanelProps) {
           </div>
         </div>
 
-        <div className="metric-card panel-cut rounded-[1.35rem] p-4">
+        <div className="metric-card panel-cut p-4">
           <p className="section-label">Highest-Impact Next Actions</p>
           <div className="mt-4 space-y-3">
             {proofScore.opportunities.map((item, index) => (
-              <div key={item} className="rounded-[1.1rem] border border-[rgba(255,255,255,0.08)] px-4 py-4">
-                <p className="mono text-[11px] uppercase tracking-[0.18em] text-stone-500">Priority {index + 1}</p>
+              <div key={item} className="rounded-xl border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.02)] px-4 py-4">
+                <p className="mono text-[11px] uppercase tracking-[0.14em] text-stone-500">Priority {index + 1}</p>
                 <p className="mt-2 text-sm leading-6 text-stone-200">{item}</p>
               </div>
             ))}
@@ -65,7 +65,7 @@ export function ProofScorePanel({ proofScore }: ProofScorePanelProps) {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="metric-card panel-cut rounded-[1.2rem] px-4 py-3 text-right">
+    <div className="metric-card panel-cut px-4 py-3 text-right">
       <p className="section-label">{label}</p>
       <p className="mono mt-3 text-xl font-semibold text-stone-100">{value}</p>
     </div>

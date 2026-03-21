@@ -11,15 +11,15 @@ export function SubmittedTxNotice({ tx, label }: SubmittedTxNoticeProps) {
   }
 
   return (
-    <div className="rounded-2xl border border-teal/30 bg-teal/10 px-4 py-4 text-sm text-teal-100">
+    <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-4 text-sm text-emerald-100">
       <p className="font-medium">{label}</p>
-      <p className="mt-2 break-all text-xs text-teal-200">{tx.txid}</p>
+      <p className="mt-2 break-all text-xs text-emerald-200/90">{tx.txid}</p>
       {tx.explorerUrl ? (
         <a
           href={tx.explorerUrl}
           target="_blank"
           rel="noreferrer"
-          className="mt-3 inline-flex text-xs font-semibold uppercase tracking-[0.18em] text-amber-200 transition hover:text-amber-100"
+          className="mt-3 inline-flex text-xs font-semibold text-orange-200 transition hover:text-orange-100"
         >
           View On Explorer
         </a>

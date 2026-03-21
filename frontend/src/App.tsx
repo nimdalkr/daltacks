@@ -50,24 +50,24 @@ export default function App() {
 
   return (
     <main className="tactical-app mx-auto flex min-h-screen w-full max-w-[88rem] flex-col px-4 py-6 text-stone-100 md:px-8 md:py-8">
-      <header className="tactical-header panel-cut rounded-[2rem] px-5 py-5 md:px-8 md:py-7">
+      <header className="tactical-header panel-cut px-5 py-5 md:px-8 md:py-7">
         <div className="hero-grid">
           <div className="space-y-6">
             <div className="max-w-4xl">
               <p className="section-label">Stacks Builder Console</p>
-              <h1 className="mt-4 max-w-4xl text-4xl font-semibold uppercase leading-[0.95] tracking-[-0.04em] text-stone-100 md:text-7xl">
+              <h1 className="mt-4 max-w-4xl text-4xl font-semibold leading-[0.95] tracking-[-0.05em] text-stone-50 md:text-7xl">
                 DALTACKS
               </h1>
               <p className="mt-5 max-w-2xl text-sm leading-7 text-stone-400 md:text-base">
-                Keep the wallet surface, then turn it into a mission-driven proof machine for real mainnet builder work.
+                Wallet assets, live activity, and mission-driven mainnet proof in one builder dashboard.
               </p>
             </div>
           </div>
 
-          <div className="tactical-panel panel-cut rounded-[1.6rem] p-5">
+          <div className="tactical-panel panel-cut p-5">
             <div className="flex items-center justify-between">
               <p className="section-label">Command Rail</p>
-              <span className="mono text-[11px] uppercase tracking-[0.28em] text-stone-500">Mainnet / Missions</span>
+              <span className="mono text-[11px] uppercase tracking-[0.2em] text-stone-500">Mainnet / Missions</span>
             </div>
             <div className="section-rule mt-4" />
             <div className="mt-5 flex flex-col items-start gap-3">
@@ -171,15 +171,15 @@ export default function App() {
       ) : null}
 
       <footer className="mt-6">
-        <section className="tactical-panel panel-cut rounded-[1.8rem] p-5 md:p-6">
+        <section className="tactical-panel panel-cut p-5 md:p-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="section-label">Stacks Ecosystem</p>
-              <h2 className="mt-3 text-2xl font-semibold uppercase tracking-[-0.03em] text-stone-100">
+              <h2 className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-stone-100">
                 Protocol Surface For Builder Missions
               </h2>
             </div>
-            <span className="mono text-[11px] uppercase tracking-[0.24em] text-stone-500">Adapters / Proof Targets</span>
+            <span className="mono text-[11px] uppercase tracking-[0.18em] text-stone-500">Adapters / Proof Targets</span>
           </div>
 
           <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -189,10 +189,10 @@ export default function App() {
                 href={item.href}
                 target="_blank"
                 rel="noreferrer"
-                className="metric-card panel-cut block rounded-[1.2rem] px-4 py-4 transition hover:border-[rgba(255,123,0,0.4)]"
+                className="metric-card panel-cut block px-4 py-4 transition hover:border-[rgba(249,115,22,0.34)] hover:bg-[rgba(255,255,255,0.06)]"
               >
                 <p className="section-label">External Link</p>
-                <p className="mt-3 text-lg font-semibold uppercase tracking-[0.02em] text-stone-100">{item.label}</p>
+                <p className="mt-3 text-lg font-semibold tracking-[-0.02em] text-stone-100">{item.label}</p>
                 <p className="mono mt-2 text-xs text-stone-500">{item.href.replace(/^https?:\/\//, "")}</p>
               </a>
             ))}

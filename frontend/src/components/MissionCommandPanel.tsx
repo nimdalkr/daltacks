@@ -73,11 +73,11 @@ export function MissionCommandPanel({
   }
 
   return (
-    <section className="tactical-panel panel-cut rounded-[1.9rem] p-5 md:p-6">
+    <section className="tactical-panel panel-cut p-5 md:p-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
           <p className="section-label">Mission Control</p>
-          <h2 className="mt-3 text-2xl font-semibold uppercase tracking-[-0.03em] text-stone-100">
+          <h2 className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-stone-100">
             Builder Mission Loop
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-stone-400">
@@ -94,9 +94,9 @@ export function MissionCommandPanel({
       {mission ? (
         <div className="mt-6 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
           <div className="space-y-4">
-            <div className="metric-card panel-cut rounded-[1.35rem] p-4">
+            <div className="metric-card panel-cut p-4">
               <p className="section-label">Active Mission</p>
-              <h3 className="mt-3 text-xl font-semibold uppercase tracking-[0.02em] text-stone-100">
+              <h3 className="mt-3 text-xl font-semibold tracking-[-0.02em] text-stone-100">
                 {mission.missionLabel}
               </h3>
               <div className="mt-4 grid gap-3 md:grid-cols-3">
@@ -108,12 +108,12 @@ export function MissionCommandPanel({
 
             <form onSubmit={handleCheckIn} className="space-y-4">
               <label className="block">
-                <span className="mb-2 block text-sm uppercase tracking-[0.08em] text-stone-400">Proof Note</span>
+                <span className="mb-2 block text-sm font-medium text-stone-300">Proof Note</span>
                 <textarea
                   value={note}
                   onChange={(event) => setNote(event.target.value)}
                   rows={5}
-                  className="w-full rounded-[1.35rem] border border-[rgba(255,255,255,0.08)] bg-[rgba(14,14,14,0.7)] px-4 py-4 text-sm text-stone-100 outline-none transition focus:border-[rgba(255,123,0,0.5)]"
+                  className="ui-textarea px-4 py-4 text-sm"
                   placeholder="Describe the work, deployment, or protocol usage you just completed."
                 />
               </label>
@@ -126,7 +126,7 @@ export function MissionCommandPanel({
                 <button
                   type="submit"
                   disabled={checkInPending}
-                  className="flex-1 rounded-[1.35rem] bg-[rgba(255,123,0,0.16)] px-5 py-4 text-sm font-semibold uppercase tracking-[0.14em] text-orange-200 transition hover:bg-[rgba(255,123,0,0.22)] disabled:cursor-not-allowed disabled:opacity-40"
+                  className="ui-primary-button flex-1 px-5 py-4 text-sm"
                 >
                   {checkInPending ? "Anchoring..." : "Anchor Check-in"}
                 </button>
@@ -135,7 +135,7 @@ export function MissionCommandPanel({
                   type="button"
                   onClick={() => void onCompleteMission()}
                   disabled={completePending || mission.checkInCount < 3}
-                  className="flex-1 rounded-[1.35rem] border border-[rgba(255,255,255,0.12)] px-5 py-4 text-sm font-semibold uppercase tracking-[0.14em] text-stone-100 transition hover:border-[rgba(255,123,0,0.36)] disabled:cursor-not-allowed disabled:opacity-40"
+                  className="ui-ghost-button flex-1 px-5 py-4 text-sm"
                 >
                   {completePending ? "Completing..." : "Complete Mission"}
                 </button>
@@ -146,7 +146,7 @@ export function MissionCommandPanel({
             <SubmittedTxNotice tx={completeMissionTx ?? null} label="Mission completion submitted." />
           </div>
 
-          <div className="metric-card panel-cut rounded-[1.35rem] p-4">
+          <div className="metric-card panel-cut p-4">
             <p className="section-label">Mission Rules</p>
             <ul className="mt-4 space-y-3 text-sm leading-6 text-stone-300">
               <li>At least 3 check-ins are required before a mission can be completed.</li>
@@ -159,34 +159,34 @@ export function MissionCommandPanel({
         <form onSubmit={handleCreate} className="mt-6 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
           <div className="space-y-4">
             <label className="block">
-              <span className="mb-2 block text-sm uppercase tracking-[0.08em] text-stone-400">Mission Label</span>
+              <span className="mb-2 block text-sm font-medium text-stone-300">Mission Label</span>
               <input
                 value={missionLabel}
                 onChange={(event) => setMissionLabel(event.target.value)}
-                className="w-full rounded-[1.35rem] border border-[rgba(255,255,255,0.08)] bg-[rgba(14,14,14,0.7)] px-4 py-4 text-sm text-stone-100 outline-none transition focus:border-[rgba(255,123,0,0.5)]"
+                className="ui-input px-4 py-4 text-sm"
                 placeholder="Mainnet Builder Run"
               />
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-sm uppercase tracking-[0.08em] text-stone-400">Objective</span>
+              <span className="mb-2 block text-sm font-medium text-stone-300">Objective</span>
               <textarea
                 value={objective}
                 onChange={(event) => setObjective(event.target.value)}
                 rows={5}
-                className="w-full rounded-[1.35rem] border border-[rgba(255,255,255,0.08)] bg-[rgba(14,14,14,0.7)] px-4 py-4 text-sm text-stone-100 outline-none transition focus:border-[rgba(255,123,0,0.5)]"
+                className="ui-textarea px-4 py-4 text-sm"
                 placeholder="Deploy, use, and document meaningful mainnet work through DALTACKS."
               />
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-sm uppercase tracking-[0.08em] text-stone-400">Duration (days)</span>
+              <span className="mb-2 block text-sm font-medium text-stone-300">Duration (days)</span>
               <input
                 type="number"
                 min={1}
                 value={durationDays}
                 onChange={(event) => setDurationDays(Number(event.target.value))}
-                className="w-full rounded-[1.35rem] border border-[rgba(255,255,255,0.08)] bg-[rgba(14,14,14,0.7)] px-4 py-4 text-sm text-stone-100 outline-none transition focus:border-[rgba(255,123,0,0.5)]"
+                className="ui-number px-4 py-4 text-sm"
               />
             </label>
 
@@ -197,13 +197,13 @@ export function MissionCommandPanel({
             <button
               type="submit"
               disabled={createMissionPending}
-              className="w-full rounded-[1.35rem] bg-[rgba(255,123,0,0.16)] px-5 py-4 text-sm font-semibold uppercase tracking-[0.14em] text-orange-200 transition hover:bg-[rgba(255,123,0,0.22)] disabled:cursor-not-allowed disabled:opacity-40"
+              className="ui-primary-button w-full px-5 py-4 text-sm"
             >
               {createMissionPending ? "Creating..." : "Start Mission"}
             </button>
           </div>
 
-          <div className="metric-card panel-cut rounded-[1.35rem] p-4">
+          <div className="metric-card panel-cut p-4">
             <p className="section-label">Why This Matters</p>
             <ul className="mt-4 space-y-3 text-sm leading-6 text-stone-300">
               <li>Mission start creates a clear mainnet action tied to your builder run.</li>
@@ -219,7 +219,7 @@ export function MissionCommandPanel({
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="metric-card panel-cut rounded-[1.1rem] px-4 py-3 text-right">
+    <div className="metric-card panel-cut px-4 py-3 text-right">
       <p className="section-label">{label}</p>
       <p className="mono mt-3 text-xl font-semibold text-stone-100">{value}</p>
     </div>

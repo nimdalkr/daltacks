@@ -31,27 +31,27 @@ export function QuestBoardPanel({ proofScore, stats, profile }: QuestBoardPanelP
   ] as const;
 
   return (
-    <section className="tactical-panel panel-cut rounded-[1.9rem] p-5 md:p-6">
+    <section className="tactical-panel panel-cut p-5 md:p-6">
       <div className="flex items-end justify-between gap-4">
         <div>
           <p className="section-label">Quest Board</p>
-          <h2 className="mt-3 text-2xl font-semibold uppercase tracking-[-0.03em] text-stone-100">
+          <h2 className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-stone-100">
             Mainnet Progress Quests
           </h2>
         </div>
-        <p className="mono text-[11px] uppercase tracking-[0.2em] text-stone-500">Quality Over Volume</p>
+        <p className="mono text-[11px] uppercase tracking-[0.14em] text-stone-500">Quality Over Volume</p>
       </div>
 
       <div className="mt-6 grid gap-3 lg:grid-cols-2">
         {quests.map((quest) => (
-          <article key={quest.title} className="metric-card panel-cut rounded-[1.35rem] p-4">
+          <article key={quest.title} className="metric-card panel-cut p-4">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-sm font-medium uppercase tracking-[0.03em] text-stone-100">{quest.title}</p>
+                <p className="text-sm font-medium text-stone-100">{quest.title}</p>
                 <p className="mt-2 text-sm leading-6 text-stone-400">{quest.detail}</p>
               </div>
               <span
-                className={`rounded-full px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] ${
+                className={`rounded-full px-3 py-2 text-[11px] font-medium ${
                   quest.status === "Complete"
                     ? "border border-[rgba(34,197,94,0.28)] bg-[rgba(34,197,94,0.1)] text-emerald-200"
                     : "border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] text-stone-400"

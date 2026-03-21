@@ -8,11 +8,11 @@ interface AssetPortfolioPanelProps {
 
 export function AssetPortfolioPanel({ portfolio, network }: AssetPortfolioPanelProps) {
   return (
-    <section className="tactical-panel panel-cut rounded-[1.9rem] p-5 md:p-6">
+    <section className="tactical-panel panel-cut p-5 md:p-6">
       <div className="flex flex-col gap-4">
         <div>
           <p className="section-label">Portfolio</p>
-          <h2 className="mt-3 text-2xl font-semibold uppercase tracking-[-0.03em] text-stone-100">Wallet Assets</h2>
+          <h2 className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-stone-100">Wallet Assets</h2>
         </div>
 
         <div className="grid gap-3 md:grid-cols-2">
@@ -79,7 +79,7 @@ function AssetList({
         {items.map((item) => (
           <article
             key={item.assetId}
-            className="metric-card panel-cut relative rounded-[1.35rem] p-4 transition hover:border-[rgba(255,123,0,0.4)]"
+            className="metric-card panel-cut relative p-4 transition hover:border-[rgba(249,115,22,0.34)] hover:bg-[rgba(255,255,255,0.05)]"
           >
             <a
               href={getExplorerPrincipalUrl(network, item.contractId)}
@@ -90,8 +90,8 @@ function AssetList({
             />
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-sm font-medium uppercase tracking-[0.03em] text-stone-100">{item.name}</p>
-                <p className="mono mt-1 text-xs uppercase tracking-[0.2em] text-stone-500">{item.symbol}</p>
+                <p className="text-sm font-medium text-stone-100">{item.name}</p>
+                <p className="mono mt-1 text-xs tracking-[0.12em] text-stone-500">{item.symbol}</p>
                 <p className="mono mt-2 text-xs text-stone-400">{truncatePrincipal(item.contractId, 10)}</p>
               </div>
 
@@ -114,10 +114,10 @@ function AssetList({
 
 function Metric({ label, value, detail }: { label: string; value: string; detail: string }) {
   return (
-    <div className="metric-card panel-cut rounded-[1.2rem] px-4 py-3 text-right">
+    <div className="metric-card panel-cut px-4 py-3 text-right">
       <p className="section-label">{label}</p>
       <p className="mono mt-3 text-2xl font-semibold text-stone-100">{value}</p>
-      <p className="mono mt-2 text-xs uppercase tracking-[0.18em] text-orange-300">{detail}</p>
+      <p className="mono mt-2 text-xs tracking-[0.12em] text-orange-300">{detail}</p>
     </div>
   );
 }

@@ -48,11 +48,11 @@ export function BuilderProfilePanel({
   }
 
   return (
-    <section className="tactical-panel panel-cut rounded-[1.9rem] p-5 md:p-6">
+    <section className="tactical-panel panel-cut p-5 md:p-6">
       <div className="flex items-end justify-between gap-4">
         <div>
           <p className="section-label">Builder Profile</p>
-          <h2 className="mt-3 text-2xl font-semibold uppercase tracking-[-0.03em] text-stone-100">
+          <h2 className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-stone-100">
             Public Mission Identity
           </h2>
         </div>
@@ -64,21 +64,21 @@ export function BuilderProfilePanel({
       <div className="mt-6 grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
         <form onSubmit={handleSubmit} className="space-y-4">
           <label className="block">
-            <span className="mb-2 block text-sm uppercase tracking-[0.08em] text-stone-400">Display Name</span>
+            <span className="mb-2 block text-sm font-medium text-stone-300">Display Name</span>
             <input
               value={displayName}
               onChange={(event) => setDisplayName(event.target.value)}
-              className="w-full rounded-[1.35rem] border border-[rgba(255,255,255,0.08)] bg-[rgba(14,14,14,0.7)] px-4 py-4 text-sm text-stone-100 outline-none transition focus:border-[rgba(255,123,0,0.5)]"
+              className="ui-input px-4 py-4 text-sm"
             />
           </label>
 
           <label className="block">
-            <span className="mb-2 block text-sm uppercase tracking-[0.08em] text-stone-400">Tagline</span>
+            <span className="mb-2 block text-sm font-medium text-stone-300">Tagline</span>
             <textarea
               value={tagline}
               onChange={(event) => setTagline(event.target.value)}
               rows={4}
-              className="w-full rounded-[1.35rem] border border-[rgba(255,255,255,0.08)] bg-[rgba(14,14,14,0.7)] px-4 py-4 text-sm text-stone-100 outline-none transition focus:border-[rgba(255,123,0,0.5)]"
+              className="ui-textarea px-4 py-4 text-sm"
             />
           </label>
 
@@ -89,7 +89,7 @@ export function BuilderProfilePanel({
           <button
             type="submit"
             disabled={publishPending}
-            className="w-full rounded-[1.35rem] border border-[rgba(255,123,0,0.28)] px-5 py-4 text-sm font-semibold uppercase tracking-[0.14em] text-orange-200 transition hover:bg-[rgba(255,123,0,0.08)] disabled:cursor-not-allowed disabled:opacity-40"
+            className="ui-primary-button w-full px-5 py-4 text-sm"
           >
             {publishPending ? "Publishing..." : profile ? "Refresh Profile Onchain" : "Publish Builder Profile"}
           </button>
@@ -98,10 +98,10 @@ export function BuilderProfilePanel({
         <div className="space-y-3">
           <p className="section-label">Claimable Badges</p>
           {badges.map((badge) => (
-            <article key={badge.badgeId} className="metric-card panel-cut rounded-[1.35rem] p-4">
+            <article key={badge.badgeId} className="metric-card panel-cut p-4">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm font-medium uppercase tracking-[0.03em] text-stone-100">{badge.label}</p>
+                  <p className="text-sm font-medium text-stone-100">{badge.label}</p>
                   <p className="mt-2 text-sm text-stone-400">
                     {badge.isClaimed ? "Already anchored onchain." : "Claim when your mission stats unlock it."}
                   </p>
@@ -111,7 +111,7 @@ export function BuilderProfilePanel({
                   type="button"
                   disabled={badge.isClaimed || claimPendingBadgeId === badge.badgeId}
                   onClick={() => void onClaimBadge({ badgeId: badge.badgeId })}
-                  className="rounded-full border border-[rgba(255,255,255,0.12)] px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-100 transition hover:border-[rgba(255,123,0,0.34)] disabled:cursor-not-allowed disabled:opacity-40"
+                  className="ui-ghost-button rounded-full px-4 py-3 text-[11px]"
                 >
                   {badge.isClaimed ? "Claimed" : claimPendingBadgeId === badge.badgeId ? "Claiming..." : "Claim"}
                 </button>
