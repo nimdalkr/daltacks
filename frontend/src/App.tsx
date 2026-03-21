@@ -1,26 +1,52 @@
 import { ActivityFeed } from "./components/ActivityFeed";
 import { AssetPortfolioPanel } from "./components/AssetPortfolioPanel";
+import { BuilderProfilePanel } from "./components/BuilderProfilePanel";
 import { EmptyState } from "./components/EmptyState";
 import { InlineState } from "./components/InlineState";
+import { MissionCommandPanel } from "./components/MissionCommandPanel";
+import { ProofScorePanel } from "./components/ProofScorePanel";
+import { QuestBoardPanel } from "./components/QuestBoardPanel";
 import { WalletConnectButton } from "./components/WalletConnectButton";
 import { WalletStatusPill } from "./components/WalletStatusPill";
-import { useRecentActivity, useWalletPortfolio } from "./hooks/useTracker";
+import {
+  useCheckIn,
+  useClaimBadge,
+  useCompleteMission,
+  useCreateMission,
+  useMissionConsole,
+  usePublishProfile,
+  useRecentActivity,
+  useWalletPortfolio
+} from "./hooks/useTracker";
 import { useWalletSession } from "./hooks/useWalletSession";
 
 const NETWORK = import.meta.env.VITE_STACKS_NETWORK ?? "mainnet";
 const ECOSYSTEM_LINKS = [
   { label: "Stacks", href: "https://www.stacks.co/" },
-  { label: "Zest Protocol", href: "https://www.zestprotocol.com/" },
   { label: "Stacking DAO", href: "https://www.stackingdao.com/" },
+  { label: "Zest Protocol", href: "https://www.zestprotocol.com/" },
   { label: "Velar", href: "https://www.velar.co/" },
   { label: "Bitflow", href: "https://www.bitflow.finance/" },
   { label: "Hiro Explorer", href: "https://explorer.hiro.so/" }
 ] as const;
 
+function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : null;
+}
+
 export default function App() {
   const wallet = useWalletSession();
+  const missionQuery = useMissionConsole(wallet.principal);
   const activityQuery = useRecentActivity(wallet.principal);
   const portfolioQuery = useWalletPortfolio(wallet.principal);
+  const createMissionMutation = useCreateMission(wallet.principal);
+  const checkInMutation = useCheckIn(wallet.principal);
+  const completeMissionMutation = useCompleteMission(wallet.principal);
+  const publishProfileMutation = usePublishProfile(wallet.principal);
+  const claimBadgeMutation = useClaimBadge(wallet.principal);
+
+  const dashboard = missionQuery.data?.dashboard ?? null;
+  const proofScore = missionQuery.data?.proofScore ?? null;
 
   return (
     <main className="tactical-app mx-auto flex min-h-screen w-full max-w-[88rem] flex-col px-4 py-6 text-stone-100 md:px-8 md:py-8">
@@ -28,12 +54,12 @@ export default function App() {
         <div className="hero-grid">
           <div className="space-y-6">
             <div className="max-w-4xl">
-              <p className="section-label">Stacks Wallet Activity</p>
+              <p className="section-label">Stacks Builder Console</p>
               <h1 className="mt-4 max-w-4xl text-4xl font-semibold uppercase leading-[0.95] tracking-[-0.04em] text-stone-100 md:text-7xl">
                 DALTACKS
               </h1>
               <p className="mt-5 max-w-2xl text-sm leading-7 text-stone-400 md:text-base">
-                A stylized tactical console for holdings, inferred DeFi exposure, and recent transaction flow.
+                Keep the wallet surface, then turn it into a mission-driven proof machine for real mainnet builder work.
               </p>
             </div>
           </div>
@@ -41,7 +67,7 @@ export default function App() {
           <div className="tactical-panel panel-cut rounded-[1.6rem] p-5">
             <div className="flex items-center justify-between">
               <p className="section-label">Command Rail</p>
-              <span className="mono text-[11px] uppercase tracking-[0.28em] text-stone-500">Mainnet / Live</span>
+              <span className="mono text-[11px] uppercase tracking-[0.28em] text-stone-500">Mainnet / Missions</span>
             </div>
             <div className="section-rule mt-4" />
             <div className="mt-5 flex flex-col items-start gap-3">
@@ -62,13 +88,59 @@ export default function App() {
         <section className="mt-6">
           <EmptyState
             title="Awaiting Wallet Link"
-            body="Connect a Stacks wallet to unlock the tactical dashboard and inspect live asset positioning."
+            body="Connect a Stacks wallet to activate missions, publish proof, and keep assets plus transaction evidence in one place."
           />
         </section>
       ) : null}
 
       {wallet.isSignedIn ? (
         <section className="mt-6 space-y-6">
+          {missionQuery.isLoading ? <InlineState message="Loading mission console..." tone="loading" /> : null}
+          {missionQuery.error instanceof Error ? <InlineState message={missionQuery.error.message} tone="error" /> : null}
+
+          {!missionQuery.isLoading && !missionQuery.error && dashboard && proofScore ? (
+            <>
+              <MissionCommandPanel
+                mission={dashboard.activeMission}
+                stats={dashboard.stats}
+                createMissionPending={createMissionMutation.isPending}
+                checkInPending={checkInMutation.isPending}
+                completePending={completeMissionMutation.isPending}
+                createMissionError={getErrorMessage(createMissionMutation.error)}
+                checkInError={getErrorMessage(checkInMutation.error)}
+                completeError={getErrorMessage(completeMissionMutation.error)}
+                createMissionTx={createMissionMutation.data ?? null}
+                checkInTx={checkInMutation.data ?? null}
+                completeMissionTx={completeMissionMutation.data ?? null}
+                onCreateMission={(input) => createMissionMutation.mutateAsync(input)}
+                onCheckIn={(input) => checkInMutation.mutateAsync(input)}
+                onCompleteMission={() => completeMissionMutation.mutateAsync()}
+              />
+
+              <ProofScorePanel proofScore={proofScore} />
+
+              <div className="grid gap-6 xl:grid-cols-[1fr_1fr]">
+                <QuestBoardPanel
+                  proofScore={proofScore}
+                  stats={dashboard.stats}
+                  profile={dashboard.profile}
+                />
+                <BuilderProfilePanel
+                  profile={dashboard.profile}
+                  badges={dashboard.badges}
+                  publishPending={publishProfileMutation.isPending}
+                  claimPendingBadgeId={claimBadgeMutation.variables?.badgeId ?? null}
+                  publishError={getErrorMessage(publishProfileMutation.error)}
+                  claimError={getErrorMessage(claimBadgeMutation.error)}
+                  publishTx={publishProfileMutation.data ?? null}
+                  claimTx={claimBadgeMutation.data ?? null}
+                  onPublishProfile={(input) => publishProfileMutation.mutateAsync(input)}
+                  onClaimBadge={(input) => claimBadgeMutation.mutateAsync(input)}
+                />
+              </div>
+            </>
+          ) : null}
+
           <div className="space-y-6">
             {portfolioQuery.isLoading ? <InlineState message="Loading wallet assets..." tone="loading" /> : null}
 
@@ -104,10 +176,10 @@ export default function App() {
             <div>
               <p className="section-label">Stacks Ecosystem</p>
               <h2 className="mt-3 text-2xl font-semibold uppercase tracking-[-0.03em] text-stone-100">
-                Representative DeFi & dApp Links
+                Protocol Surface For Builder Missions
               </h2>
             </div>
-            <span className="mono text-[11px] uppercase tracking-[0.24em] text-stone-500">Bitcoin DeFi Surface</span>
+            <span className="mono text-[11px] uppercase tracking-[0.24em] text-stone-500">Adapters / Proof Targets</span>
           </div>
 
           <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">

@@ -1,36 +1,47 @@
-// import { request } from "@stacks/connect";
+import { request } from "@stacks/connect";
 import {
   bufferCV,
   cvToHex,
   cvToValue,
   deserializeCV,
   principalCV,
+  stringAsciiCV,
   uintCV
 } from "@stacks/transactions";
 import {
   getTrackedCoinGeckoIds,
   fromMicroStx,
+  getExplorerTxUrl,
   getStacksApiBaseUrl,
   resolveKnownTokenPrice,
   type StacksNetworkName
 } from "@daltacks/stx-utils";
 import {
   TrackerSdk,
+  type BuilderBadge,
+  type BuilderProfile,
+  type BuilderStats,
   type ContractArg,
+  type ContractCallDraft,
+  type MissionRecord,
   type ReadOnlyRequest,
-  type SnapshotRecord,
+  type TrackerDashboard,
   type TrackerSdkConfig,
   type TrackerTransport
 } from "@daltacks/tracker-sdk";
-// import { type ContractCallDraft } from "@daltacks/tracker-sdk";
-import type { ActivityItem, TokenHolding, WalletPortfolio } from "../types/tracker";
-// import type { SubmittedTx } from "../types/tracker";
+import type { ActivityItem, MissionConsole, ProofScore, SubmittedTx, TokenHolding, WalletPortfolio } from "../types/tracker";
 
 const NETWORK = (import.meta.env.VITE_STACKS_NETWORK ?? "mainnet") as StacksNetworkName;
 const API_BASE_URL = import.meta.env.VITE_STACKS_API_BASE_URL ?? getStacksApiBaseUrl(NETWORK);
 const CONTRACT_NAME = import.meta.env.VITE_CONTRACT_NAME ?? "tracker";
 const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS ?? "ST000000000000000000002AMW42H";
 const MIN_VISIBLE_ASSET_VALUE_USD = 1;
+const PROTOCOL_MARKERS = [
+  { label: "Stacking DAO", patterns: ["stacking-dao", "stackingdao", "ststx"] },
+  { label: "Zest", patterns: ["zest"] },
+  { label: "Bitflow", patterns: ["bitflow"] },
+  { label: "Velar", patterns: ["velar"] }
+] as const;
 
 export const trackerConfig: TrackerSdkConfig = {
   network: NETWORK,
@@ -61,6 +72,8 @@ function toClarityArg(arg: ContractArg) {
       return uintCV(arg.value);
     case "buffer":
       return bufferCV(hexToBytes(arg.hex));
+    case "ascii":
+      return stringAsciiCV(arg.value);
     default:
       throw new Error("Unsupported contract argument");
   }
@@ -103,22 +116,60 @@ function toHex(value: unknown): string | null {
   return null;
 }
 
-function normalizeSnapshot(value: unknown): SnapshotRecord | null {
+function normalizeMission(value: unknown): MissionRecord | null {
   if (!value || typeof value !== "object") {
     return null;
   }
 
-  const snapshot = value as Record<string, unknown>;
+  const mission = value as Record<string, unknown>;
 
   return {
-    id: toNumber(snapshot.id) ?? 0,
-    owner: String(snapshot.owner ?? ""),
-    commitmentHash: toHex(snapshot["commitment-hash"] ?? snapshot.commitmentHash) ?? "0x",
-    createdAtHeight: toNumber(snapshot["created-at-height"] ?? snapshot.createdAtHeight) ?? 0,
-    dueAtHeight: toNumber(snapshot["due-at-height"] ?? snapshot.dueAtHeight) ?? 0,
-    checkInCount: toNumber(snapshot["check-in-count"] ?? snapshot.checkInCount) ?? 0,
-    lastProofHash: toHex(snapshot["last-proof-hash"] ?? snapshot.lastProofHash),
-    lastCheckInHeight: toNumber(snapshot["last-check-in-height"] ?? snapshot.lastCheckInHeight)
+    id: toNumber(mission.id) ?? 0,
+    owner: String(mission.owner ?? ""),
+    missionLabel: String(mission["mission-label"] ?? mission.missionLabel ?? "mission"),
+    commitmentHash: toHex(mission["commitment-hash"] ?? mission.commitmentHash) ?? "0x",
+    createdAtHeight: toNumber(mission["created-at-height"] ?? mission.createdAtHeight) ?? 0,
+    dueAtHeight: toNumber(mission["due-at-height"] ?? mission.dueAtHeight) ?? 0,
+    checkInCount: toNumber(mission["check-in-count"] ?? mission.checkInCount) ?? 0,
+    lastProofHash: toHex(mission["last-proof-hash"] ?? mission.lastProofHash),
+    lastCheckInHeight: toNumber(mission["last-check-in-height"] ?? mission.lastCheckInHeight),
+    status: String(mission.status ?? "active"),
+    completedAtHeight: toNumber(mission["completed-at-height"] ?? mission.completedAtHeight)
+  };
+}
+
+function normalizeProfile(value: unknown): BuilderProfile | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const profile = value as Record<string, unknown>;
+
+  return {
+    owner: String(profile.owner ?? ""),
+    displayName: String(profile["display-name"] ?? profile.displayName ?? ""),
+    tagline: String(profile.tagline ?? ""),
+    publishedAtHeight: toNumber(profile["published-at-height"] ?? profile.publishedAtHeight) ?? 0
+  };
+}
+
+function normalizeBuilderStats(value: unknown): BuilderStats {
+  if (!value || typeof value !== "object") {
+    return {
+      totalMissionsCreated: 0,
+      missionsCompleted: 0,
+      totalCheckIns: 0,
+      lastActiveHeight: null
+    };
+  }
+
+  const stats = value as Record<string, unknown>;
+
+  return {
+    totalMissionsCreated: toNumber(stats["total-missions-created"] ?? stats.totalMissionsCreated) ?? 0,
+    missionsCompleted: toNumber(stats["missions-completed"] ?? stats.missionsCompleted) ?? 0,
+    totalCheckIns: toNumber(stats["total-check-ins"] ?? stats.totalCheckIns) ?? 0,
+    lastActiveHeight: toNumber(stats["last-active-height"] ?? stats.lastActiveHeight)
   };
 }
 
@@ -214,6 +265,51 @@ function shouldDisplayAsset(item: Pick<TokenHolding, "valueUsd">) {
   return item.valueUsd === null || item.valueUsd >= MIN_VISIBLE_ASSET_VALUE_USD;
 }
 
+function extractActiveProtocols(contractIds: string[]) {
+  const catalog = new Set<string>();
+
+  for (const contractId of contractIds) {
+    const normalized = contractId.toLowerCase();
+
+    for (const marker of PROTOCOL_MARKERS) {
+      if (marker.patterns.some((pattern) => normalized.includes(pattern))) {
+        catalog.add(marker.label);
+      }
+    }
+  }
+
+  return Array.from(catalog);
+}
+
+function buildOpportunities(
+  dashboard: TrackerDashboard,
+  stats: Pick<ProofScore, "contractDeployments" | "successfulTransactions" | "activeProtocolCount">
+) {
+  const suggestions: string[] = [];
+
+  if (stats.contractDeployments === 0) {
+    suggestions.push("Deploy one meaningful mainnet contract to unlock the strongest proof signal.");
+  }
+
+  if (dashboard.stats.totalCheckIns < 3) {
+    suggestions.push("Reach 3 mission check-ins to secure your first streak badge.");
+  }
+
+  if (stats.activeProtocolCount < 2) {
+    suggestions.push("Use two Stacks ecosystem protocols to broaden your proof surface.");
+  }
+
+  if (!dashboard.profile) {
+    suggestions.push("Publish a public builder profile so judges can verify your mission identity.");
+  }
+
+  if (stats.successfulTransactions < 8) {
+    suggestions.push("Push more successful mainnet actions through DALTACKS to strengthen usage evidence.");
+  }
+
+  return suggestions.slice(0, 3);
+}
+
 async function fetchKnownUsdPrices() {
   try {
     const response = await fetch("/api/prices");
@@ -230,9 +326,7 @@ async function fetchKnownUsdPrices() {
       (entry): entry is [string, number] => typeof entry[1] === "number"
     );
 
-    return new Map(
-      priceEntries.filter(([coinId]) => getTrackedCoinGeckoIds().includes(coinId))
-    );
+    return new Map(priceEntries.filter(([coinId]) => getTrackedCoinGeckoIds().includes(coinId)));
   } catch {
     return new Map<string, number>();
   }
@@ -269,14 +363,56 @@ async function decodeReadOnlyResult(response: Response, request: ReadOnlyRequest
   const value = cvToValue(clarityValue);
 
   switch (request.functionName) {
+    case "get-active-mission":
     case "get-active-snapshot":
     case "get-snapshot":
-      return normalizeSnapshot(value);
+      return normalizeMission(value);
+    case "get-profile":
+      return normalizeProfile(value);
+    case "get-builder-stats":
+      return normalizeBuilderStats(value);
     case "get-snapshot-id-by-owner":
       return toNumber(value);
+    case "has-badge":
+      return Boolean(value);
     default:
       return value;
   }
+}
+
+async function fetchOnchainEvidence(principal: string, limit = 50) {
+  const response = await fetch(
+    `${API_BASE_URL}/extended/v2/addresses/${principal}/transactions?limit=${limit}&offset=0&exclude_function_args=true`
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch recent contract activity");
+  }
+
+  const payload = (await response.json()) as {
+    results?: Array<{
+      tx?: {
+        tx_id?: string;
+        tx_status?: string;
+        block_height?: number;
+        block_time_iso?: string;
+        tx_type?: string;
+        sender_address?: string;
+        fee_rate?: string;
+        contract_call?: {
+          contract_id?: string;
+          function_name?: string;
+        };
+        smart_contract?: {
+          contract_id?: string;
+        };
+      };
+    }>;
+  };
+
+  return (payload.results ?? [])
+    .map((entry) => entry.tx)
+    .filter((tx): tx is NonNullable<typeof tx> => Boolean(tx));
 }
 
 export function createTrackerTransport(): TrackerTransport {
@@ -318,6 +454,51 @@ export function createTrackerTransport(): TrackerTransport {
 
       return fromMicroStx(payload.stx?.balance) ?? null;
     }
+  };
+}
+
+export async function getMissionConsole(principal: string): Promise<MissionConsole> {
+  const transport = createTrackerTransport();
+  const [dashboard, transactions] = await Promise.all([
+    trackerSdk.getDashboard(principal, transport),
+    fetchOnchainEvidence(principal, 60)
+  ]);
+
+  const successfulTransactions = transactions.filter((tx) => tx.tx_status === "success");
+  const contractIds = successfulTransactions
+    .map((tx) => tx.contract_call?.contract_id ?? tx.smart_contract?.contract_id ?? null)
+    .filter((value): value is string => Boolean(value));
+  const activeProtocols = extractActiveProtocols(contractIds);
+  const totalFeesMicroStx = successfulTransactions.reduce((sum, tx) => sum + Number(tx.fee_rate ?? "0"), 0);
+  const contractDeployments = successfulTransactions.filter((tx) => tx.tx_type === "smart_contract").length;
+  const uniqueContracts = new Set(contractIds).size;
+  const proofScore =
+    contractDeployments * 40 +
+    dashboard.stats.missionsCompleted * 20 +
+    dashboard.stats.totalCheckIns * 4 +
+    uniqueContracts * 8 +
+    activeProtocols.length * 12 +
+    Math.min(successfulTransactions.length, 20) * 2 +
+    Math.min(totalFeesMicroStx / 100_000, 30);
+
+  const scorecard: ProofScore = {
+    successfulTransactions: successfulTransactions.length,
+    contractDeployments,
+    totalFeesMicroStx,
+    uniqueContracts,
+    activeProtocolCount: activeProtocols.length,
+    activeProtocols,
+    proofScore,
+    opportunities: buildOpportunities(dashboard, {
+      contractDeployments,
+      successfulTransactions: successfulTransactions.length,
+      activeProtocolCount: activeProtocols.length
+    })
+  };
+
+  return {
+    dashboard,
+    proofScore: scorecard
   };
 }
 
@@ -447,45 +628,18 @@ export async function hashTextToHex(value: string) {
 }
 
 export async function getRecentActivity(principal: string, limit = 12): Promise<ActivityItem[]> {
-  const response = await fetch(
-    `${API_BASE_URL}/extended/v2/addresses/${principal}/transactions?limit=${limit}&offset=0&exclude_function_args=true`
-  );
+  const transactions = await fetchOnchainEvidence(principal, limit);
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch recent contract activity");
-  }
-
-  const payload = (await response.json()) as {
-    results?: Array<{
-        tx?: {
-          tx_id?: string;
-          tx_status?: string;
-          block_height?: number;
-          block_time_iso?: string;
-          tx_type?: string;
-          sender_address?: string;
-          contract_call?: {
-            contract_id?: string;
-            function_name?: string;
-          };
-        };
-    }>;
-  };
-
-  return (payload.results ?? [])
-    .map((entry) => entry.tx)
-    .filter((tx): tx is NonNullable<typeof tx> => Boolean(tx))
-    .map((tx) => ({
-      txId: tx.tx_id ?? "",
-      title: formatActivityTitle(tx.tx_type, tx.contract_call?.function_name),
-      subtitle: tx.contract_call?.contract_id ?? tx.sender_address ?? null,
-      status: tx.tx_status ?? "unknown",
-      blockHeight: tx.block_height ?? null,
-      timestampIso: tx.block_time_iso ?? null
-    }));
+  return transactions.map((tx) => ({
+    txId: tx.tx_id ?? "",
+    title: formatActivityTitle(tx.tx_type, tx.contract_call?.function_name),
+    subtitle: tx.contract_call?.contract_id ?? tx.smart_contract?.contract_id ?? tx.sender_address ?? null,
+    status: tx.tx_status ?? "unknown",
+    blockHeight: tx.block_height ?? null,
+    timestampIso: tx.block_time_iso ?? null
+  }));
 }
 
-/*
 async function submitContractCall(draft: ContractCallDraft): Promise<SubmittedTx> {
   const result = await request("stx_callContract", {
     contract: `${draft.contractAddress}.${draft.contractName}`,
@@ -501,11 +655,33 @@ async function submitContractCall(draft: ContractCallDraft): Promise<SubmittedTx
   };
 }
 
-export async function createSnapshot(commitmentHashHex: string, dueAtHeight: number) {
-  return submitContractCall(trackerSdk.buildCreateSnapshotTx({ commitmentHashHex, dueAtHeight }));
+export async function createMission(missionLabel: string, commitmentHashHex: string, dueAtHeight: number) {
+  return submitContractCall(
+    trackerSdk.buildCreateMissionTx({
+      missionLabel,
+      commitmentHashHex,
+      dueAtHeight
+    })
+  );
 }
 
 export async function submitCheckIn(proofHashHex: string) {
   return submitContractCall(trackerSdk.buildCheckInTx({ proofHashHex }));
 }
-*/
+
+export async function completeMission() {
+  return submitContractCall(trackerSdk.buildCompleteMissionTx());
+}
+
+export async function publishProfile(displayName: string, tagline: string) {
+  return submitContractCall(
+    trackerSdk.buildPublishProfileTx({
+      displayName,
+      tagline
+    })
+  );
+}
+
+export async function claimBadge(badgeId: number) {
+  return submitContractCall(trackerSdk.buildClaimBadgeTx({ badgeId }));
+}

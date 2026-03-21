@@ -1,4 +1,11 @@
-export type { SnapshotRecord, TrackerDashboard } from "@daltacks/tracker-sdk";
+export type {
+  BuilderBadge,
+  BuilderProfile,
+  BuilderStats,
+  MissionRecord,
+  SnapshotRecord,
+  TrackerDashboard
+} from "@daltacks/tracker-sdk";
 
 export interface ActivityItem {
   txId: string;
@@ -30,6 +37,22 @@ export interface WalletPortfolio {
   lockedStxValueUsd: number | null;
   fungibleTokens: TokenHolding[];
   defiTokens: TokenHolding[];
+}
+
+export interface ProofScore {
+  successfulTransactions: number;
+  contractDeployments: number;
+  totalFeesMicroStx: number;
+  uniqueContracts: number;
+  activeProtocolCount: number;
+  activeProtocols: string[];
+  proofScore: number;
+  opportunities: string[];
+}
+
+export interface MissionConsole {
+  dashboard: TrackerDashboard;
+  proofScore: ProofScore;
 }
 
 export interface SubmittedTx {

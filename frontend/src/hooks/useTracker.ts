@@ -1,16 +1,24 @@
-import { useQuery } from "@tanstack/react-query";
-// import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { getRecentActivity, getWalletPortfolio } from "../services/contract";
-// import { createSnapshot, getCurrentBlockHeight, hashTextToHex, submitCheckIn } from "../services/contract";
-// import { createTrackerTransport, trackerSdk } from "../services/contract";
-// const transport = createTrackerTransport();
-// export function useDashboard(principal: string | null) {
-//   return useQuery({
-//     queryKey: ["dashboard", principal],
-//     queryFn: () => trackerSdk.getDashboard(principal!, transport),
-//     enabled: Boolean(principal)
-//   });
-// }
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  claimBadge,
+  completeMission,
+  createMission,
+  getCurrentBlockHeight,
+  getMissionConsole,
+  getRecentActivity,
+  getWalletPortfolio,
+  hashTextToHex,
+  publishProfile,
+  submitCheckIn
+} from "../services/contract";
+
+export function useMissionConsole(principal: string | null) {
+  return useQuery({
+    queryKey: ["mission-console", principal],
+    queryFn: () => getMissionConsole(principal!),
+    enabled: Boolean(principal)
+  });
+}
 
 export function useRecentActivity(principal: string | null) {
   return useQuery({
@@ -28,43 +36,75 @@ export function useWalletPortfolio(principal: string | null) {
   });
 }
 
-/*
-export function useCreateSnapshot(principal: string | null) {
+function useMissionInvalidation(principal: string | null) {
   const queryClient = useQueryClient();
 
+  return async function invalidate() {
+    if (!principal) {
+      return;
+    }
+
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["mission-console", principal] }),
+      queryClient.invalidateQueries({ queryKey: ["activity", principal] }),
+      queryClient.invalidateQueries({ queryKey: ["portfolio", principal] })
+    ]);
+  };
+}
+
+export function useCreateMission(principal: string | null) {
+  const invalidate = useMissionInvalidation(principal);
+
   return useMutation({
-    mutationFn: async ({ objective, durationDays }: { objective: string; durationDays: number }) => {
+    mutationFn: async ({ missionLabel, objective, durationDays }: { missionLabel: string; objective: string; durationDays: number }) => {
       const [commitmentHashHex, currentBlockHeight] = await Promise.all([
         hashTextToHex(objective),
         getCurrentBlockHeight()
       ]);
 
       const dueAtHeight = currentBlockHeight + durationDays * 144;
-      return createSnapshot(commitmentHashHex, dueAtHeight);
+      return createMission(missionLabel, commitmentHashHex, dueAtHeight);
     },
-    onSuccess: async () => {
-      if (principal) {
-        await queryClient.invalidateQueries({ queryKey: ["dashboard", principal] });
-        await queryClient.invalidateQueries({ queryKey: ["activity", principal] });
-      }
-    }
+    onSuccess: invalidate
   });
 }
 
 export function useCheckIn(principal: string | null) {
-  const queryClient = useQueryClient();
+  const invalidate = useMissionInvalidation(principal);
 
   return useMutation({
     mutationFn: async ({ note }: { note: string }) => {
       const proofHashHex = await hashTextToHex(note);
       return submitCheckIn(proofHashHex);
     },
-    onSuccess: async () => {
-      if (principal) {
-        await queryClient.invalidateQueries({ queryKey: ["dashboard", principal] });
-        await queryClient.invalidateQueries({ queryKey: ["activity", principal] });
-      }
-    }
+    onSuccess: invalidate
   });
 }
-*/
+
+export function useCompleteMission(principal: string | null) {
+  const invalidate = useMissionInvalidation(principal);
+
+  return useMutation({
+    mutationFn: () => completeMission(),
+    onSuccess: invalidate
+  });
+}
+
+export function usePublishProfile(principal: string | null) {
+  const invalidate = useMissionInvalidation(principal);
+
+  return useMutation({
+    mutationFn: ({ displayName, tagline }: { displayName: string; tagline: string }) =>
+      publishProfile(displayName, tagline),
+    onSuccess: invalidate
+  });
+}
+
+export function useClaimBadge(principal: string | null) {
+  const invalidate = useMissionInvalidation(principal);
+
+  return useMutation({
+    mutationFn: ({ badgeId }: { badgeId: number }) => claimBadge(badgeId),
+    onSuccess: invalidate
+  });
+}

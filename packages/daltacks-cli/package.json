@@ -1,0 +1,20 @@
+{
+  "name": "@daltacks/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "daltacks": "dist/index.js"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@daltacks/stx-utils": "0.1.0",
+    "@daltacks/tracker-sdk": "0.1.0",
+    "@stacks/transactions": "^7.0.2"
+  }
+}
